@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.editors">
+   </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            id="dotplugin.contribution1"
+            nameFilter="*.dot"
+            objectClass="org.eclipse.core.resources.IFile">
+         <action
+               class="dotplugin.popup.actions.OpenDotBrowser"
+               enablesFor="1"
+               id="dotplugin.dotBrowser"
+               label="Open DotBrowser"
+               state="false"
+               style="push">up1">
+         </action>  
+      </objectContribution>
+       <objectContribution
+            id="dotplugin.contribution1"
+            nameFilter="*.svg"
+            objectClass="org.eclipse.core.resources.IFile">
+      <action
+               class="dotplugin.popup.actions.OpenSvgBrowser"
+               enablesFor="1"
+               id="dotplugin.svgBrowser"
+               label="Open SvgBrowser"
+               state="false"
+               style="push">up1">
+         </action>
+         </objectContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="dotplugin.GraphVizPreferencePage"
+            id="dotplugin.GraphVizPreferencePage"
+            name="Dot">
+      </page>
+   </extension>
+</plugin>
