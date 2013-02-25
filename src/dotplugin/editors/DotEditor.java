@@ -12,6 +12,7 @@ package dotplugin.editors;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -54,7 +55,10 @@ public class DotEditor extends EditorPart {
 	public void createPartControl(Composite parent) {
 		System.err.println("createPartControl");
 		try {
-			GraphViz.browse(selectedFile.getContents(), null);
+			IPath path = selectedFile.getProjectRelativePath().removeFileExtension()
+					.addFileExtension("svg").removeFirstSegments(1);
+		    IFile dotOutput = selectedFile.getProject().getFile(path);
+			GraphViz.browse(selectedFile.getContents(), dotOutput);
 		} catch (CoreException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -14,6 +14,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
+
 public class SvgBrowser {
 
 	public static void browse(URL loc) {
@@ -24,22 +25,15 @@ public class SvgBrowser {
 		try {
 			IWorkbenchBrowserSupport browserSupport = PlatformUI.getWorkbench()
 					.getBrowserSupport();
-			System.err.println(browserSupport.isInternalWebBrowserAvailable());
 			browser = browserSupport.createBrowser(
-					IWorkbenchBrowserSupport.AS_EDITOR, loc.getFile(),
-					null, "scalable vector graphics");
-			System.err.println("open:" + browser);
+					IWorkbenchBrowserSupport.LOCATION_BAR, "dotplugin.editors.DotEditor",
+					loc.getFile(), null);
 			browser.openURL(loc);
+			// browser.close();
 		} catch (PartInitException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-		// }
-		// catch (PartInitException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
 	}
 
 	public static void browse(String loc, Point size) {

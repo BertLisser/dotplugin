@@ -2,7 +2,13 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension
-         point="org.eclipse.ui.editors">
+         point="org.eclipse.ui.editors">       
+   <!--<editor
+            name="Dot Viewer"
+            extensions="Dot"
+            class="dotplugin.editors.DotEditor"
+            id="dotplugin.editors.DotEditor">
+      </editor> /-->
    </extension>
    <extension
          point="org.eclipse.ui.popupMenus">
