@@ -1,20 +1,24 @@
 package dotplugin.popup.actions;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IActionDelegate;
+import org.eclipse.ui.IEditorRegistry;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.part.FileEditorInput;
 
 import dotplugin.GraphViz;
 
 public class OpenDotBrowser implements IObjectActionDelegate {
 
-	
 	private IFile file;
 
 	/**
@@ -24,21 +28,28 @@ public class OpenDotBrowser implements IObjectActionDelegate {
 		super();
 	}
 
-
 	/**
 	 * @see IActionDelegate#run(IAction)
 	 */
 	public void run(IAction action) {
 		if (file != null) {
 			try {
-				IPath path = file.getProjectRelativePath().removeFileExtension()
-						.addFileExtension("svg");
-			    IFile dotOutput = file.getProject().getFile(path);
-				GraphViz.browse(file.getContents(), dotOutput);
-			} catch (CoreException e) {
-				// TODO Auto-generated catch block
+				IPath path = file.getProjectRelativePath()
+						.removeFileExtension().addFileExtension("svg");
+				IFile dotOutput = file.getProject().getFile(path);
+				GraphViz.createDotFile(file.getContents(), dotOutput);
+				PlatformUI
+						.getWorkbench()
+						.getActiveWorkbenchWindow()
+						.getActivePage()
+						.openEditor(new FileEditorInput(dotOutput),
+								IEditorRegistry.SYSTEM_EXTERNAL_EDITOR_ID);
+			} catch (PartInitException e) {
 				e.printStackTrace();
-			} 
+			} catch (CoreException e) {
+				e.printStackTrace();
+			}
+
 		}
 
 	}
@@ -53,12 +64,10 @@ public class OpenDotBrowser implements IObjectActionDelegate {
 		}
 	}
 
-
-
 	@Override
 	public void setActivePart(IAction action, IWorkbenchPart targetPart) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

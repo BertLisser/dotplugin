@@ -88,30 +88,31 @@ public class GraphViz {
 		throw new CoreException(status);
 	}
 
+	public static void createDotFile(final InputStream input, IFile dotOutput) {
+		File output = null;
+		try {
+			output = execute(input, "svg");
+			Filter.exec(output, dotOutput);
+		} catch (CoreException e) {
+			e.printStackTrace();
+		} finally {
+			IOUtils.closeQuietly(input);
+		}
+
+	}
 
 	public static void browse(final InputStream input, IFile dotOutput) {
 		MultiStatus status = new MultiStatus(Activator.ID, 0,
 				"Errors occurred while running Graphviz", null);
-		File output = null;
 		try {
-//			System.err.println("dotOutput:"
-//					+ dotOutput.getRawLocation().toOSString());
-			output = execute(input, "svg");
-			Filter.exec(output, dotOutput);
+			createDotFile(input, dotOutput);
 			URL url = dotOutput.getRawLocationURI().toURL();
 			// System.err.println("dotOutput:" + url);
 			SvgBrowser.browse(url);
 		} catch (SWTException e) {
 			status.add(new Status(IStatus.ERROR, Activator.ID, "", e));
-		} catch (CoreException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} finally {
-			// if (dotOutput!=null) dotOutput.delete();
-			IOUtils.closeQuietly(input);
 		}
 	}
 

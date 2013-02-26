@@ -3,6 +3,7 @@
 	<name>dotplugin</name>
 	<comment></comment>
 	<projects>
+		<project>rascal</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
