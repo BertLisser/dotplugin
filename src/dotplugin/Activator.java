@@ -74,10 +74,11 @@ public class Activator extends AbstractUIPlugin  {
 
 	public static final String ID = "dotplugin"; 
 
-	private static Activator instance;
+	private static Activator plugin;
 
 	public static Activator getInstance() {
-		return instance;
+		System.err.println("Activator getInstance:"+plugin);
+		return plugin;
 	}
 
 	/**
@@ -124,7 +125,8 @@ public class Activator extends AbstractUIPlugin  {
 	 */
 
 	public Activator() {
-		instance = this;
+		// System.err.println("HALLO:"+this.getClass()+" "+this);
+		// instance = this;
 //		LogUtils.addLogListener(new ILogListener(){
 //
 //			@Override
@@ -132,6 +134,7 @@ public class Activator extends AbstractUIPlugin  {
 //				System.err.println(status.getMessage());
 //				
 //			}});
+		System.err.println(this.hashCode());
 	}
 
 	/**
@@ -293,6 +296,9 @@ public class Activator extends AbstractUIPlugin  {
 	public void start(BundleContext context) throws Exception {
 		// try to find a bundled dot.
 		super.start(context);
+		plugin = this;
+		GraphViz.setActivator(this);
+		System.err.println("Activator START:"+plugin.getClass()+" "+this.hashCode());
 		try {
 			extractGraphVizBinaries(context);
 		} catch (IOException e) {

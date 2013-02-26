@@ -43,6 +43,12 @@ import dotplugin.editors.SvgBrowser;
 public class GraphViz {
 	private static final String DOT_EXTENSION = ".dot"; //$NON-NLS-1$
 	private static final String TMP_FILE_PREFIX = "graphviz"; //$NON-NLS-1$
+	volatile private static Activator activator;
+	
+	static public void setActivator(Activator activator) {
+		GraphViz.activator = activator;
+		System.err.println(GraphViz.activator);
+	}
 
 	private static File execute(final InputStream input, String format)
 			throws CoreException {
@@ -126,12 +132,14 @@ public class GraphViz {
 		try {
 			cmd.add("-o" + dotOutput.getCanonicalPath());
 			cmd.add("-T" + format);
-			String commandLineExtension = Activator.getInstance()
-					.getCommandLineExtension();
-			System.err.println("runDot:" + commandLineExtension);
-			if (commandLineExtension != null) {
-				String[] tokens = commandLineExtension.split(" ");
-				cmd.addAll(Arrays.asList(tokens));
+			if (Activator.getInstance() != null) {
+				String commandLineExtension = Activator.getInstance()
+						.getCommandLineExtension();
+				System.err.println("runDot:" + commandLineExtension);
+				if (commandLineExtension != null) {
+					String[] tokens = commandLineExtension.split(" ");
+					cmd.addAll(Arrays.asList(tokens));
+				}
 			}
 			cmd.add(dotInput.getAbsolutePath());
 			return runDot(cmd.toArray(new String[cmd.size()]));
@@ -158,7 +166,8 @@ public class GraphViz {
 	 * @throws IOException
 	 */
 	public static IStatus runDot(String... options) {
-		IPath dotFullPath = Activator.getInstance().getDotLocation();
+		System.err.println("runDotQQ:"+activator);
+		IPath dotFullPath = activator.getDotLocation();
 		if (dotFullPath == null || dotFullPath.isEmpty())
 			return new Status(
 					IStatus.ERROR,

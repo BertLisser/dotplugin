@@ -1,4 +1,4 @@
-module Display
+module dotplugin::Display
 
 // public int aap() { return 22;}
 
