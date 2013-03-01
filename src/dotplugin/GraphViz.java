@@ -43,18 +43,12 @@ import dotplugin.editors.SvgBrowser;
 public class GraphViz {
 	private static final String DOT_EXTENSION = ".dot"; //$NON-NLS-1$
 	private static final String TMP_FILE_PREFIX = "graphviz"; //$NON-NLS-1$
-	volatile private static Activator activator;
 	
-	static public void setActivator(Activator activator) {
-		GraphViz.activator = activator;
-		System.err.println(GraphViz.activator);
-	}
 
 	private static File execute(final InputStream input, String format)
 			throws CoreException {
 		MultiStatus status = new MultiStatus(Activator.ID, 0,
 				"Errors occurred while running Graphviz", null);
-		// File dotInput = null;
 		// we keep the input in memory so we can include it in error messages
 		ByteArrayOutputStream dotContents = new ByteArrayOutputStream();
 		File dotInput = null, dotOutput = null;
@@ -76,13 +70,10 @@ public class GraphViz {
 
 				IOUtils.closeQuietly(tmpDotInputStream);
 			}
-			System.err.println("runDot:" + dotOutput);
 
 			IStatus result = runDot(format, dotInput, dotOutput);
-
 			status.add(result);
 			// status.add(logInput(dotContents));
-			// System.err.println("runDot:" + status);
 			if (!result.isOK())
 				LogUtils.log(status);
 			return dotOutput;
@@ -99,6 +90,7 @@ public class GraphViz {
 		try {
 			output = execute(input, "svg");
 			Filter.exec(output, dotOutput);
+			LogUtils.logInfo("finished >"+dotOutput.getName(), null);
 		} catch (CoreException e) {
 			e.printStackTrace();
 		} finally {
@@ -113,7 +105,6 @@ public class GraphViz {
 		try {
 			createDotFile(input, dotOutput);
 			URL url = dotOutput.getRawLocationURI().toURL();
-			// System.err.println("dotOutput:" + url);
 			SvgBrowser.browse(url);
 		} catch (SWTException e) {
 			status.add(new Status(IStatus.ERROR, Activator.ID, "", e));
@@ -132,15 +123,13 @@ public class GraphViz {
 		try {
 			cmd.add("-o" + dotOutput.getCanonicalPath());
 			cmd.add("-T" + format);
-			if (Activator.getInstance() != null) {
-				String commandLineExtension = Activator.getInstance()
-						.getCommandLineExtension();
-				System.err.println("runDot:" + commandLineExtension);
+				String commandLineExtension = Pref.getCommandLineExtension();
+				// System.err.println("runDot:" + commandLineExtension);
 				if (commandLineExtension != null) {
 					String[] tokens = commandLineExtension.split(" ");
 					cmd.addAll(Arrays.asList(tokens));
-				}
-			}
+				}	
+			// System.err.println("runDot:" + dotInput.getAbsolutePath());
 			cmd.add(dotInput.getAbsolutePath());
 			return runDot(cmd.toArray(new String[cmd.size()]));
 		} catch (IOException e) {
@@ -150,6 +139,7 @@ public class GraphViz {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private static IStatus logInput(ByteArrayOutputStream dotContents) {
 		return new Status(IStatus.INFO, Activator.ID, "dot input was:\n"
 				+ dotContents, null);
@@ -166,8 +156,10 @@ public class GraphViz {
 	 * @throws IOException
 	 */
 	public static IStatus runDot(String... options) {
-		System.err.println("runDotQQ:"+activator);
-		IPath dotFullPath = activator.getDotLocation();
+		
+		// IPath dotFullPath = activator.getDotLocation();
+		IPath dotFullPath = Pref.getDotLocation();
+		LogUtils.logInfo("Start "+dotFullPath, null);
 		if (dotFullPath == null || dotFullPath.isEmpty())
 			return new Status(
 					IStatus.ERROR,
@@ -179,14 +171,15 @@ public class GraphViz {
 		List<String> cmd = new ArrayList<String>();
 		cmd.add(dotFullPath.toOSString());
 		// insert user custom options
+		/*
 		String commandLineExtension = Activator.getInstance()
 				.getCommandLineExtension();
 		if (commandLineExtension != null) {
 			String[] tokens = commandLineExtension.split(" ");
 			cmd.addAll(Arrays.asList(tokens));
 		}
+		*/
 		cmd.addAll(Arrays.asList(options));
-
 		ByteArrayOutputStream errorOutput = new ByteArrayOutputStream();
 		try {
 			final ProcessController controller = new ProcessController(60000,

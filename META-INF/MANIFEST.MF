@@ -18,4 +18,5 @@ Import-Package: org.apache.commons.io,
  org.eclipse.imp.pdb.facts,
  org.eclipse.ui.internal.browser,
  org.eclipse.ui.part,
+ org.rascalmpl.eclipse.nature,
  org.rascalmpl.interpreter

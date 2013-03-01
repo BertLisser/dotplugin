@@ -27,7 +27,6 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
-import dotplugin.Activator.DotMethod;
 
 public class GraphVizPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 	/**
@@ -54,7 +53,6 @@ public class GraphVizPreferencePage extends PreferencePage implements IWorkbench
 	}
 
 	private Button automaticDotButton;
-	private Button useBundledDotButton;
 	private Button autodetectDotButton;
 	private Button specifyDotButton;
 	
@@ -76,7 +74,7 @@ public class GraphVizPreferencePage extends PreferencePage implements IWorkbench
 	 *            automatically selected.
 	 * @return The new button.
 	 */
-	private Button createButton(Group group, String label, boolean enabled, DotMethod method) {
+	private Button createButton(Group group, String label, boolean enabled, Pref.DotMethod method) {
 		Button button;
 
 		button = createRadioButton(group, label);
@@ -140,7 +138,7 @@ public class GraphVizPreferencePage extends PreferencePage implements IWorkbench
 		commandLineText = new Text(group, SWT.SINGLE | SWT.BORDER);
 		
 		
-		String existing = Activator.getInstance().getCommandLineExtension();
+		String existing = Pref.getCommandLineExtension();
 		commandLineText.setText(existing == null ? "" : existing);
 
 		data = new GridData();
@@ -158,14 +156,13 @@ public class GraphVizPreferencePage extends PreferencePage implements IWorkbench
 		buttonComposite.setLayoutData(data);
 		buttonComposite.setText("Dot executable to use");
 
-		Activator graphviz = Activator.getInstance();
-		automaticDotButton = createButton(buttonComposite, "Choose Automatically", true, DotMethod.AUTO);
-		useBundledDotButton = createButton(buttonComposite, "Bundled", graphviz.hasBundledInstall(), DotMethod.BUNDLE);
-		String detectedDotLocation = graphviz.autodetectDots();
+		automaticDotButton = createButton(buttonComposite, "Choose Automatically", true, Pref.DotMethod.AUTO);
+		
+		String detectedDotLocation = Pref.autodetectDots();
 		final boolean dotDetected = detectedDotLocation != null;
 		String detectLabel = "Detected: " + (dotDetected ? detectedDotLocation : "(none)");
-		autodetectDotButton = createButton(buttonComposite, detectLabel, dotDetected, DotMethod.DETECT);
-		specifyDotButton = createButton(buttonComposite, "Specify Manually:", true, DotMethod.MANUAL);
+		autodetectDotButton = createButton(buttonComposite, detectLabel, dotDetected, Pref.DotMethod.DETECT);
+		specifyDotButton = createButton(buttonComposite, "Specify Manually:", true, Pref.DotMethod.MANUAL);
 		
 
 		dotBrowser = new FileBrowserField(buttonComposite) {
@@ -174,8 +171,8 @@ public class GraphVizPreferencePage extends PreferencePage implements IWorkbench
 				dotBrowserChanged(getText());
 			}
 		};
-		dotBrowser.setText(graphviz.getManualDotPath());
-		dotBrowser.setEnabled(getCurrentDotMethod() == DotMethod.MANUAL);
+		dotBrowser.setText(Pref.getManualDotPath());
+		dotBrowser.setEnabled(getCurrentDotMethod() == Pref.DotMethod.MANUAL);
 
 		data = new GridData();
 		data.horizontalIndent = 20;
@@ -209,26 +206,26 @@ public class GraphVizPreferencePage extends PreferencePage implements IWorkbench
 				setErrorMessage(newText + " is a directory");
 				setValid(false);
 				return;
-			} else if (!Activator.isExecutable(dotFile))
+			} else if (!Pref.isExecutable(dotFile))
 				setMessage(newText + " is not executable!", IMessageProvider.WARNING);
-			else if (!Activator.DOT_FILE_NAME.equalsIgnoreCase(fileName))
-				setMessage("The file name should be " + Activator.DOT_FILE_NAME , IMessageProvider.WARNING);
+			else if (!Pref.DOT_FILE_NAME.equalsIgnoreCase(fileName))
+				setMessage("The file name should be " + Pref.DOT_FILE_NAME , IMessageProvider.WARNING);
 		}
 		setValid(true);
 	}
 
 	/** Returns the Dot search method that is currently in effect */
-	DotMethod getCurrentDotMethod() {
-		return Activator.getInstance().getDotSearchMethod();
+	Pref.DotMethod getCurrentDotMethod() {
+		return Pref.getDotSearchMethod();
 	}
 
 	/**
 	 * Scans the radio buttons and returns the dot method that the user has
 	 * selected.
 	 */
-	DotMethod getNewDotMethod() {
-		return useBundledDotButton.getSelection() ? DotMethod.BUNDLE : autodetectDotButton.getSelection()
-						? DotMethod.DETECT : specifyDotButton.getSelection() ? DotMethod.MANUAL : DotMethod.AUTO;
+	Pref.DotMethod getNewDotMethod() {
+		return autodetectDotButton.getSelection()
+						? Pref.DotMethod.DETECT : specifyDotButton.getSelection() ? Pref.DotMethod.MANUAL : Pref.DotMethod.AUTO;
 	}
 
 	/**
@@ -242,11 +239,10 @@ public class GraphVizPreferencePage extends PreferencePage implements IWorkbench
 	 */
 	@Override
 	protected void performDefaults() {
-		DotMethod dotMethod = DotMethod.AUTO;
-		automaticDotButton.setSelection(dotMethod == DotMethod.AUTO);
-		useBundledDotButton.setSelection(dotMethod == DotMethod.BUNDLE);
-		autodetectDotButton.setSelection(dotMethod == DotMethod.DETECT);
-		specifyDotButton.setSelection(dotMethod == DotMethod.MANUAL);
+		Pref.DotMethod dotMethod = Pref.DotMethod.AUTO;
+		automaticDotButton.setSelection(dotMethod == Pref.DotMethod.AUTO);
+		autodetectDotButton.setSelection(dotMethod == Pref.DotMethod.DETECT);
+		specifyDotButton.setSelection(dotMethod == Pref.DotMethod.MANUAL);
 		dotBrowser.setText("");
 		commandLineText.setText("");
 		super.performDefaults();
@@ -257,10 +253,9 @@ public class GraphVizPreferencePage extends PreferencePage implements IWorkbench
 	 */
 	@Override
 	public boolean performOk() {
-		Activator graphviz = Activator.getInstance();
-		graphviz.setDotSearchMethod(getNewDotMethod());
-		graphviz.setManualDotPath(dotBrowser.getText());
-		graphviz.setCommandLineExtension(commandLineText.getText());
+		Pref.setDotSearchMethod(getNewDotMethod());
+		Pref.setManualDotPath(dotBrowser.getText());
+		Pref.setCommandLineExtension(commandLineText.getText());
 		return true;
 	}
 }
