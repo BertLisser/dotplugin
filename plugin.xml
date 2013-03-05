@@ -53,4 +53,7 @@
             name="Dot">
       </page>
    </extension>
+   <extension
+         point="rascal_eclipse.rascalLibrary">
+   </extension>
 </plugin>
