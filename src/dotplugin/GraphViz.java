@@ -159,7 +159,12 @@ public class GraphViz {
 		
 		// IPath dotFullPath = activator.getDotLocation();
 		IPath dotFullPath = Pref.getDotLocation();
-		LogUtils.logInfo("Start "+dotFullPath, null);
+		StringBuffer b = new StringBuffer(dotFullPath.toString());
+		for (String o:options) {
+			b.append(" ");
+			b.append(o);
+		}
+		LogUtils.logInfo("Start "+b.toString(), null);
 		if (dotFullPath == null || dotFullPath.isEmpty())
 			return new Status(
 					IStatus.ERROR,
@@ -182,17 +187,23 @@ public class GraphViz {
 		cmd.addAll(Arrays.asList(options));
 		ByteArrayOutputStream errorOutput = new ByteArrayOutputStream();
 		try {
-			final ProcessController controller = new ProcessController(60000,
+			final ProcessController controller = new ProcessController(6000,
 					cmd.toArray(new String[cmd.size()]), null, dotFullPath
 							.removeLastSegments(1).toFile());
 			controller.forwardErrorOutput(errorOutput);
 			controller.forwardOutput(System.out);
 			controller.forwardInput(System.in);
 			int exitCode = controller.execute();
-			if (exitCode != 0)
-				return new Status(IStatus.WARNING, Activator.ID,
-						"Graphviz exit code: " + exitCode + "."
-								+ createContentMessage(errorOutput));
+//			System.err.println("runDot:"+exitCode+" size:"+errorOutput.size());
+//			if (exitCode != 0) {
+//				for (String o:options) {
+//					System.err.println(o);
+//				}
+//				System.err.println(dotFullPath.toString());
+//				return new Status(IStatus.WARNING, Activator.ID,
+//						"Graphviz exit code: " + exitCode + "."
+//								+ createContentMessage(errorOutput));
+//			}
 			if (errorOutput.size() > 0)
 				return new Status(IStatus.WARNING, Activator.ID,
 						createContentMessage(errorOutput));

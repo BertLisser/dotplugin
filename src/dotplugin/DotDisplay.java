@@ -57,13 +57,18 @@ public class DotDisplay {
 
 		}
 	};
-	
+
 	public void dotDisplay(IString input, IEvaluatorContext ctx) {
-		String  s = input.getValue();
-		dotDisplay(s, ctx);       
+		String s = input.getValue();
+		dotDisplay(null, null, s, ctx);
 	}
 
-	private void dotDisplay(String input, IEvaluatorContext ctx) {
+	public void dotDisplay(IString projName, IString out, IString input, IEvaluatorContext ctx) {
+		String s = input.getValue();
+		dotDisplay(projName.getValue(), out.getValue(), s, ctx);
+	}
+
+	private void dotDisplay(String projName, String outName, String input, IEvaluatorContext ctx) {
 		try {
 			File dotInput = File.createTempFile(TMP_FILE_PREFIX, DOT_EXTENSION);
 			dotInput.deleteOnExit();
@@ -71,19 +76,25 @@ public class DotDisplay {
 			IOUtils.copy(IOUtils.toInputStream(input), dotStream);
 			IOUtils.closeQuietly(dotStream);
 			URI uri = dotInput.toURI();
-			dotDisplay(uri, ctx);  
+			dotDisplay(projName, outName, uri, ctx);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	
-	public void dotDisplay(ISourceLocation sloc, IEvaluatorContext ctx) {
+
+	public void dotDisplay(IString projName, IString outName, ISourceLocation sloc,
+			IEvaluatorContext ctx) {
 		URI uri = sloc.getURI();
-		dotDisplay(uri, ctx);       
+		dotDisplay(projName.getValue(), outName.getValue(), uri, ctx);
 	}
 
-	private void dotDisplay(URI  uri, IEvaluatorContext ctx) {
+	public void dotDisplay(ISourceLocation sloc, IEvaluatorContext ctx) {
+		URI uri = sloc.getURI();
+		dotDisplay(null, null, uri, ctx);
+	}
+
+	private void dotDisplay(String projName, String outName, URI uri, IEvaluatorContext ctx) {
 		try {
 			InputStream input = ctx.getResolverRegistry().getInputStream(uri);
 			if ("project".equals(uri.getScheme())) {
@@ -92,13 +103,15 @@ public class DotDisplay {
 				IPath path = p.getFile(uri.getPath()).getProjectRelativePath();
 				dotOutput = p.getFile(path.removeFileExtension()
 						.addFileExtension("svg"));
-
 			} else if ("file".equals(uri.getScheme())) {
 				IPath path = new Path(uri.getPath());
 				IProject p = ResourcesPlugin.getWorkspace().getRoot()
-						.getProject(Activator.ID);
-				path = new Path(path.removeFileExtension().lastSegment())
-						.addFileExtension("svg");
+						.getProject(projName==null?Activator.ID:projName);
+				if (outName == null)
+					path = new Path(path.removeFileExtension().lastSegment())
+							.addFileExtension("svg");
+				else
+					path = new Path(outName).addFileExtension("svg");
 				dotOutput = p.getFile(new Path("src").append(path));
 			}
 			if (dotOutput == null)
