@@ -98,6 +98,21 @@ public class GraphViz {
 		}
 
 	}
+	
+	public static String createDotString(final InputStream input) {
+		File output = null;
+		try {
+			output = execute(input, "svg");
+			String r = Filter.exec(output);
+			LogUtils.logInfo("finished >", null);
+			return r;
+		} catch (CoreException e) {
+			e.printStackTrace();
+		} finally {
+			IOUtils.closeQuietly(input);			
+		}
+		return "";
+	}
 
 	public static void browse(final InputStream input, IFile dotOutput) {
 		MultiStatus status = new MultiStatus(Activator.ID, 0,
@@ -194,7 +209,7 @@ public class GraphViz {
 			controller.forwardOutput(System.out);
 			controller.forwardInput(System.in);
 			int exitCode = controller.execute();
-//			System.err.println("runDot:"+exitCode+" size:"+errorOutput.size());
+			System.err.println("runDot:"+exitCode+" size:"+errorOutput.size());
 //			if (exitCode != 0) {
 //				for (String o:options) {
 //					System.err.println(o);

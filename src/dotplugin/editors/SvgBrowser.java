@@ -25,8 +25,10 @@ public class SvgBrowser {
 		try {
 			IWorkbenchBrowserSupport browserSupport = PlatformUI.getWorkbench()
 					.getBrowserSupport();
+			System.err.println("PATH"+loc.getPath());
 			browser = browserSupport.createBrowser(
-					IWorkbenchBrowserSupport.AS_EXTERNAL, "dotplugin.editors.DotEditor",
+					loc.getPath().endsWith("svg")?
+							IWorkbenchBrowserSupport.AS_EXTERNAL:IWorkbenchBrowserSupport.AS_EDITOR, "dotplugin.editors.DotEditor",
 					loc.getFile(), null);
 			browser.openURL(loc);
 			// browser.close();
