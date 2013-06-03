@@ -13,6 +13,10 @@ module dotplugin::HTMLutils
 import List;
 import DateTime;
 
+alias JsProp=tuple[str, str];
+
+alias JsProps=list[tuple[str, str]];
+
 public str html(str head, str body) {
 	return "\<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"
             '  \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"\>
@@ -130,6 +134,7 @@ public str tr(str txt){
 public str table(str txt){
   return "\<table\><txt>\</table\>";
 }
+
 public str table(str id, str txt){
   return "\<table id=\"<id>\"\><txt>\</table\>";
 }
@@ -163,17 +168,24 @@ public str div(str id, str class, str txt){
 	return "\n\<div id=\"<id>\" class=\"<class>\"\>\n<txt>\n\</div\>\n";
 }
 
+public str span(str class, str src) {
+	return "\<span class=\"<class>\"\><src>\</span\>";
+}
+
+public str spanId(str id, str src) {
+	return "\<span id=\"<id>\"\><src>\</span\>";
+}
+
 public str ahref(str href, str txt) {
-	return "\n\<a href=\"<href>\" \><txt>\</a\>\n";
+	return "\<a href=\"<href>\" \><txt>\</a\>";
 }
 
 public str ahref(str id, str href, str txt) {
-	return "\n\<a id=\"<id>\" href=\"<href>\" \><txt>\</a\>\n";
+	return "\<a id=\"<id>\" href=\"<href>\" \><txt>\</a\>";
 }
 
-
 public str ahref(str id, str class, str href, str txt) {
-	return "\n\<a id=\"<id>\" class=\"<class>\" href=\"<href>\" \><txt>\</a\>\n";
+	return "\<a id=\"<id>\" class=\"<class>\" href=\"<href>\" \><txt>\</a\>";
 }
 
 
@@ -208,8 +220,40 @@ public str escapeForJavascript(str txt){
     };
 }
 
+public str htmlButton(str title, str onClick) {
+    return "\<button type=\"button\" onclick = <onClick>\>"+
+       "<escapeForHtml(title)>\</button\>";
+    }
+    
+public str htmlButton(str name, str title, str onClick) {
+    return "\<button type=\"button\" name=\"<name>\" onclick = <onClick>\>"+
+       "<escapeForHtml(title)>\</button\>";
+    }
 
-
+public str jS(str txt) {
+   return "\n\<script\><txt>\n\</script\>";
+   }
+   
+public str jsFun(str name, str elem, str body) {
+   return "\nfunction <name>()\n"+"{\n"+
+   "var elm = document.getElementById(\"<elem>\");\n"+
+   "<body>\n"+"}\n";  
+   ;
+   }
+   
+public str jsSet(str name, str elem, str tagg, JsProp prop) {
+   return "\nfunction <name>()\n"+"{\n"+
+   "var elm = document.getElementById(\"<elem>\").getElementsByTagName(\"<tagg>\");\n"+
+   "for (var i=0;i\<elm.length;i++) {elm[i].setAttribute(\'<prop[0]>\', \'<prop[1]>\');}\n"+"}\n";  
+   ;
+   }
+   
+public str jsTextContent(str name, str elem, str txt) {
+   return "\nfunction <name>(<elem>, <txt>)\n"+"{\n"+
+   "var elm = document.getElementById(<elem>).getElementsByTagName(\"text\");\n"+
+   "for (var i=0;i\<elm.length;i++) {elm[i].textContent=<txt>;}\n"+"}\n";  
+   ;
+   }
 
 
 
