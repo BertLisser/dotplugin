@@ -11,11 +11,20 @@ import lang::box::util::Box;
 //  G reference, D definition
 data Box = G(str lab, list[Box])|D(str lab, list[Box]);
 
+str width ="800px", height = "700px"; 
 
-public str rascalDoc2HTML(loc l) {
+str content = "content";
+
+public Tree rascal2ParseTree(loc l) {
     pt = annotateMathOps(parseModule(l).top, mathLiterals);	
-    pt = annotateDef(pt);
-	return toHtml(pt);
+    pt = annotateDefRef(pt);
+	return pt;
+}
+
+
+public str rascal2HTML(loc l, str title) {
+    Tree pt = rascal2Parse(l); 
+    return ParseTree2HTML(pt, title);	
 }
 
 
@@ -153,23 +162,9 @@ private str escapeString(str s) {
 private str escape(str s) {
 	return escape(s, htmlEscapes);
 }
+    
 
-// str script = "function goTo(click_id)\n" 
-//    +  "{window.location.replace(\"#\"+click_id);}";
-
-str header =  "\<style\>"+
-  ".keyword{font-weight:bold;color:darkmagenta;}"+
-  ".string{color:darkmagenta;}"+
-  ".comment{color:gray;}"+
-  "td{vertical-align:top;}"+
-  "tr{width:inherit;}"+
-  "button{width:inherit;}"+
-  "#panel{border:2px groove grey;}"
-                           +"#canvas{border:2px groove grey;}"+
-   "button{width:inherit;}"+
-             "\</style\>";
-                            
-
+                        
 private str rascalModuleToHTML(loc l) {
 	pt = annotateMathOps(parseModule(l), mathLiterals);	
 	pt = annotateDef(pt);
@@ -202,8 +197,7 @@ private Tree annotateRef(Tree tree) {
 	}
 }
 
-
-private Tree annotateDef(Tree tree) {
+private Tree annotateDefRef(Tree tree) {
 	return top-down-break visit (tree) {	
 		case a:appl(prod(def:label("language", sort("SyntaxDefinition")), _, _), list[Tree] q)=> 
 		   updateTree(a[@def="<q[4]>"], 8, annotateRef(q[8]))
@@ -212,17 +206,16 @@ private Tree annotateDef(Tree tree) {
 	}
 }
 
-private str refButtons(Tree t) {
+private str refButtons(str title, Tree t) {
      str r = "";
      top-down visit (t) {
      case Tree a: { 
-		    if (a@def?) r+=tr(td(htmlButton("<a@def>", a@def, "\"goTo(this.name)\"")));
+		     if (a@def?) r+=tr(td(ahrefIdOnclick("<title>.html#<a@def>", "goTo(this.id)", a@def)));
 		 }
 	   } 
 	 return r;
      }
      
-
 private list[str] report(Tree t) {
     list[str] r = [];
 	top-down visit (t) {
@@ -233,18 +226,75 @@ private list[str] report(Tree t) {
 	return r;
 }
 
-private str toHtml(Tree t) {
+// -----   Main Part
+
+str headerScript = "function goTo(loc)\n" 
+    +  "{document.getElementById(\'syntax\').src=loc;return false;}";
+
+str header =  
+  "\<style\>"+
+     ".keyword{font-weight:bold;color:darkmagenta;}\n"+
+     ".string{color:darkmagenta;}\n"+
+      ".comment{color:gray;}\n"+
+  "\</style\>";
+                   
+str topHeader =  jS(headerScript)+"\<style\>\n"+
+   ".panel{border:2px groove grey;background-color:antiquewhite;}\n"+
+    "td{vertical-align:top;}\n"+
+    "h1{text-align:center;}\n"+
+    "#syntax{background-color:antiquewhite;}\n" +
+    "\</style\>";
+
+private str ParseTree2HTML(Tree t, str titl) {
    str bod = rascalModuleToHTML(t);  
    str txt = "\<pre\>\<code class=\"rascal\"\>"+bod+"\n\</code\>\</pre\>";
-   // str buttons = table("panel", refButtons(t));
-   str r = html(head(header), body(table(tr(tdid("canvas", txt)))));
+   str r = html(head(title("IFrame version of  <titl>.rsc")+header), body(span("canvas", txt)));
    return r;
    }
    
+private str topPanel(Tree pt, str titl) {
+   str hd = "<titl>.rsc";
+   str r = html(head(title(hd)+topHeader), body(
+        h(1, img("../rascal3D_2-66px.png", "Rascal")+hd)+table(tr(
+          td(
+            div("divId1", h2("Nonterminals"))+
+            tableScrollableClass(height,"panel", refButtons("<content>", pt)
+             ))
+        +td(div("divId2", h2("Content"))+iframe("<content>.html", "syntax", width, height))
+        )))
+        ); 
+   return r; 
+   }
+   
+list[tuple[str, loc]] inputs = [
+                    // <"C", |project://main/std/lang/c90/syntax/C.rsc|> 
+                    <"dot", |project://main/std/lang/dot/syntax/Dot.rsc|>
+                    , <"pico", |project://main/std/lang/pico/syntax/Main.rsc|>
+                    , <"rascal", |project://main/std/lang/rascal/syntax/Rascal.rsc|> 
+                    , <"sdf2", |project://main/std/lang/sdf2/syntax/Sdf2.rsc|>                            
+                   ];
+   
 public void main() {
    // rprint(parseModule(|project://main/src/Ap.rsc|));
-   loc l = |project://main/src/C.rsc|;
-   str r = rascalDoc2HTML(l);
-   writeFile(|project://dotplugin/src/C.html|, r);
+   // loc l = |project://main/src/C.rsc|;
+   // println(inputs);
+   for (<title, l><-inputs)  {
+       println(title);
+       rascal2HTML(title, l, |file:///ufs/bertl/html|);
+       }
    }
+   
+public void rascal2HTML(str title, loc input, loc output) {
+     output+=title;
+     if (!exists(output)) {
+         mkDirectory(output);
+         }
+     Tree pt = rascal2ParseTree(input);
+     str r =  ParseTree2HTML(pt, title);
+     loc outIframe = output+"<content>.html";
+     writeFile(outIframe, r);
+     loc outMain = output+"index.html";
+     str top = topPanel(pt, title);
+     writeFile(outMain, top);   
+}
    
