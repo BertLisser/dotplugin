@@ -1,6 +1,6 @@
 module www::Scrabble
 import Prelude;
-import www::XmlWrite;
+import www::HtmlWrite;
 import www::XmlColor;
 import dotplugin::Display;
 
@@ -45,34 +45,57 @@ str entries() {
     str r = "";
     for (d<-[0..15]) {
          w =  v[d*15..d*15+15];
-         r +=tr("<for(x<-w){><tdClass("cell", divClass(x,""))> <}>");
+         r +=tr("<for(x<-w){><td(class(x), div(class("cell")))> <}>");
          }
     return r;
     }
     
 str board() {
-    return tableClass("mainTable", captionClass("bigheader", "S C R A B B L E")+tbody(entries()));
+    return table(class("mainTable"),"cellspacing=0", tbody(entries()));
+    }
+    
+str letterCode() {
+    return dl(dt("A")+dd("1")+dt("B")+dd("2")+dt("C")+dd("3"));
+    }
+    
+str game() {
+    return table(class("gameBoard"), 
+    thead(tr(th("","width=20"), th(class("upHeader"), "S C R A B B L E")))+
+    tfoot(tr(th(""), th("S C R A B B L E")))+
+    tbody(tr(th(class("sideHeader"),  "S C R A B B L E"), td(board())+td(letterCode(),"style=vertical-align:top"))));
     }
 
 public void main()  {
-    tag2att += (
-            ".mainTable":("border":"none", "background-color":"grey","border-collapse":"collapse")         
-            );
-    tag2att += (".cell":("width":siz,"height":siz,"border":"1px groove lightgrey", "padding":"0"));
-    tag2att += (".w3":("width":siz,"height":siz, "background-color":"red"));
-    tag2att += (".w2":("width":siz,"height":siz, "background-color":"pink"));
-    tag2att += (".l3":("width":siz,"height":siz, "background-color":"blue"));
-    tag2att += (".l2":("width":siz,"height":siz, "background-color":"lightskyblue"));
-    tag2att += (".default":("width":siz,"height":siz, "background-color":"seashell"));
-    tag2att += (".bigheader": 
-                  ("background-color": "lighgrey", 
-                   "border":"1px solid grey",
-                   "height":"20px",
-                    "text-align":"center")
+    S(".mainTable", "border:1px solid", "padding:1px");   
+    S(".cell", "width:<siz>","height:<siz>","border:1px inset lightgrey", "padding:0");
+    S(".w3", "background-color:red");
+    S(".w2", "background-color:pink");
+    S(".l3", "background-color:blue");
+    S(".l2", "background-color:lightskyblue");
+    S("table");
+    S(".bigheader", "background-color:lighgrey", 
+                   "border:1px solid grey",
+                   "height:20px",
+                   "text-align:center"
                  );
-    str m = board();
+    S("td", "padding:0");
+    S("dl", "border:3px double #ccc","padding:0.5em","margin:0");
+    S("dt", "float: left", /*"clear": "left",*/ 
+                "width:30px", "text-align:right", 
+                "font-weight:bold", "color:green"); 
+    S("dt:after", "content:\":\"");
+    S(".gameBoard","border:1px solid black",  "background-color:seashell", "width:500px");
+    S(".upHeader", "transform:rotate(180deg)",
+                 "-ms-transform:rotate(180deg)", /* IE 9 */
+                 "-webkit-transform: rotate(18 0deg)");
+    S(".sideHeader", "width:1m", "letter-spacing: 5px",
+                     "font-size: 18px",
+                   "height:300px");  
+    // S(".sideTableHeader", "border:1px solid", "padding:0", "text-align:right","max-width:1m");
+                 /* Safari and Chrome */
+    str m = table(tr(td(game())));
     str r = html(m);
     // println(r);
-    // writeFile(|file:///ufs/bertl/aap.html|, r);
+    writeFile(|file:///ufs/bertl/html/aap.html|, r);
     htmlDisplay("dotplugin", "html", r);
     }
