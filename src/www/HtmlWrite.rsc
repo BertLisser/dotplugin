@@ -1,3 +1,12 @@
+@license{
+  Copyright (c) 2009-2013 CWI
+  All rights reserved. This program and the accompanying materials
+  are made available under the terms of the Eclipse Public License v1.0
+  which accompanies this distribution, and is available at
+  http://www.eclipse.org/legal/epl-v10.html
+}
+@contributor{Bert Lisser - Bert.Lisser@cwi.nl}
+/* Don't use the symbol '=' in the text */
 module www::HtmlWrite
 import Prelude;
 
@@ -11,6 +20,7 @@ public map[str, WProperty] key2att = (
    "body":(tg:"body"),
    "head":(tg:"head"),
    "title":(tg:"title"),
+   "script":(tg:"script"),
    "h1":(tg:"h1"), 
    "h2":(tg:"h2"),  
    "h3":(tg:"h3"), 
@@ -38,6 +48,7 @@ public map[str, WProperty] key2att = (
    "samp":(tg:"samp"),
    "em":(tg:"em"), 
    "strong":(tg:"strong"), 
+   "small":(tg:"small"), 
    "code":(tg:"code"),
    "kbd":(tg:"kbd"),
    "var":(tg:"var"),
@@ -46,7 +57,9 @@ public map[str, WProperty] key2att = (
    "ul":(tg:"ul"), 
    "dl":(tg:"dl"), 
    "dt":(tg:"dt"),
-   "dd":(tg:"dd")      
+   "dd":(tg:"dd"),
+   "sub":(tg:"sub"),
+   "sup":(tg:"sup")     
    );
    
 public str class(str s) {
@@ -69,7 +82,7 @@ public str toCSS() {
    return r;
    }
 
-public str html(str head, str body) {
+private str _html(str head, str body) {
 	return "\<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"
             '  \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"\>
             '  \<html xmlns=\"http://www.w3.org/1999/xhtml\"\>
@@ -80,9 +93,12 @@ public str html(str head, str body) {
 }
 
 public str html(str b) {
-    return  html(head(toCSS()), body(b));
+    return  _html(head(toCSS()), body(b));
     }
     
+public str html(str hd, str b) {
+    return  _html(head(hd+toCSS()), body(b));
+    }   
 private bool or(bool b...) {
     for (bool x<-b) if (x) return true;
     return false;
@@ -92,12 +108,12 @@ private str _(str key, map[str, WProperty] m, list[str] txt) {
     WProperty props = m[key];
     str key = props[tg];
     /* Cannot handle with ||  -- Bug in Rascal? */
-    list[str] content = [x|str x<-txt, or(startsWith(x,"\<"),!contains(x,"="))];
+    list[str] content = [x|str x<-txt, or(contains(x,"\<"),!contains(x,"="))];
     list[str] atts = txt - content;
     str s = "<for(x<-content){><x><}>";
     return "\<<key><for(x<-props, x!=tg)
          {> <x>=\"<props[x]>\"<}> <for(x<-atts) {> <x><}>"
-         +"\> <s>\n\</<key>\>";
+         +"\><s>\</<key>\>";
     }
  
 public void _(list[str] atts) {
@@ -108,7 +124,7 @@ public void _(list[str] atts) {
    
 public void S(str att...) {return _(att);
 }  
-public str aHref(str txt ...) {return _("a", key2att, txt);}
+public str a(str txt ...) {return _("a", key2att, txt);}
 
 public str p(str txt... ) {return _("p", key2att, txt);}
 
@@ -129,6 +145,8 @@ public str div(str txt...) {return _("div", key2att, txt);}
 public str body (str txt...) {return _("body", key2att, txt);}
 
 public str head (str txt...) {return _("head", key2att, txt);}
+
+public str script (str txt...) {return _("script", key2att, txt);}
 
 public str title (str txt...) {return _("title", key2att, txt);}
 
@@ -174,6 +192,8 @@ public str em(str txt...){return _("em", key2att, txt);}
 
 public str strong(str txt...){return _("strong", key2att, txt);}
 
+public str small(str txt...){return _("small", key2att, txt);}
+
 public str samp(str txt...){return _("samp", key2att, txt);}
 
 public str kbd(str txt...){return _("kbd", key2att, txt);}
@@ -195,3 +215,7 @@ public str dl(str txt...){return _("dl", key2att, txt);}
 public str dt(str txt...){return _("dt", key2att, txt);}
 
 public str dd(str txt...){return _("dd", key2att, txt);}
+
+public str sub(str txt...){return _("sub", key2att, txt);}
+
+public str sup(str txt...){return _("sup", key2att, txt);}

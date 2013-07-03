@@ -1,6 +1,6 @@
 module dotplugin::ToHtml
 import Prelude;
-import dotplugin::HTMLutils;
+import www::HtmlWrite;
 import util::Reflective;
 import lang::rascal::grammar::definition::Modules;
 import lang::rascal::grammar::definition::Productions;
@@ -11,7 +11,7 @@ import lang::box::util::Box;
 //  G reference, D definition
 data Box = G(str lab, list[Box])|D(str lab, list[Box]);
 
-str width ="800px", height = "700px"; 
+str width ="600px", height = "800px"; 
 
 str content = "content";
 
@@ -19,12 +19,6 @@ public Tree rascal2ParseTree(loc l) {
     pt = annotateMathOps(parseModule(l).top, mathLiterals);	
     pt = annotateDefRef(pt);
 	return pt;
-}
-
-
-public str rascal2HTML(loc l, str title) {
-    Tree pt = rascal2Parse(l); 
-    return ParseTree2HTML(pt, title);	
 }
 
 
@@ -132,7 +126,6 @@ private map[str, str] htmlEscapes = (
 );
 
 
-
 // &#9251 = open box 
 private map[str, str] stringEscapes = htmlEscapes + (" ": "&middot;");
 
@@ -140,14 +133,14 @@ private str highlight2html(list[Box] bs) {
 	res = "";
 	for (b <- bs) {
 		switch (b) {
-			case KW(L(s)): 		res += span("keyword", s);
-			case STRING(L(s)): 	res += span("string", escapeString(s));
-			case COMM(L(s)): 	res += span("comment", escape(s));
-			case VAR(L(s)): 	res += span("variable", escape(s));
-			case MATH(L(s)): 	res += span("math", s);
+			case KW(L(s)): 		res += span(class("keyword"), s);
+			case STRING(L(s)): 	res += span(class("string"), escapeString(s));
+			case COMM(L(s)): 	res += span(class("comment"), escape(s));
+			case VAR(L(s)): 	res += span(class("variable"), escape(s));
+			case MATH(L(s)): 	res += span(class("math"), s);
 			case L(s): 			res += escape(s);
-			case D(s, l):       res += spanId(s, highlight2html(l)); 
-			case G(s, l):       res += ahref("#<s>", highlight2html(l)); 
+			case D(s, l):       res += span(id(s), highlight2html(l)); 
+			case G(s, l):       res += a("href=#<s>", highlight2html(l)); 
 			default: throw "Unhandled box: <b>"; // todo NUM, REF etc. 
 		}
 	}
@@ -206,11 +199,11 @@ private Tree annotateDefRef(Tree tree) {
 	}
 }
 
-private str refButtons(str title, Tree t) {
+private str refButtons(Tree t) {
      str r = "";
      top-down visit (t) {
-     case Tree a: { 
-		     if (a@def?) r+=tr(td(ahrefIdOnclick("<title>.html#<a@def>", "goTo(this.id)", a@def)));
+     case Tree q: { 
+		     if (q@def?) r+=tr(td(a("href=#<q@def>", q@def)));
 		 }
 	   } 
 	 return r;
@@ -230,37 +223,26 @@ private list[str] report(Tree t) {
 
 str headerScript = "function goTo(loc)\n" 
     +  "{document.getElementById(\'syntax\').src=loc;return false;}";
-
-str header =  
-  "\<style\>"+
-     ".keyword{font-weight:bold;color:darkmagenta;}\n"+
-     ".string{color:darkmagenta;}\n"+
-      ".comment{color:gray;}\n"+
-  "\</style\>";
                    
-str topHeader =  jS(headerScript)+"\<style\>\n"+
-   ".panel{border:2px groove grey;background-color:antiquewhite;}\n"+
-    "td{vertical-align:top;}\n"+
-    "h1{text-align:center;}\n"+
-    "#syntax{background-color:antiquewhite;}\n" +
-    "\</style\>";
+str topHeader =  script(headerScript);
 
-private str ParseTree2HTML(Tree t, str titl) {
-   str bod = rascalModuleToHTML(t);  
-   str txt = "\<pre\>\<code class=\"rascal\"\>"+bod+"\n\</code\>\</pre\>";
-   str r = html(head(title("IFrame version of  <titl>.rsc")+header), body(span("canvas", txt)));
-   return r;
+private str getContent(Tree t) {
+   str bod = rascalModuleToHTML(t); 
+   str txt = pre(code(class("rascal") , bod));
+   return txt;
    }
-   
+
 private str topPanel(Tree pt, str titl) {
-   str hd = "<titl>.rsc";
+   str hd = " <titl>.rsc";
    str r = html(head(title(hd)+topHeader), body(
-        h(1, img("../rascal3D_2-66px.png", "Rascal")+hd)+table(tr(
+        h1(img("src=../rascal3D_2-66px.png", "Rascal")+hd)+
+        table("cellspacing=\"10px\"", "cellpadding=\"2px\"",
+        tr(
           td(
-            div("divId1", h2("Nonterminals"))+
-            tableScrollableClass(height,"panel", refButtons("<content>", pt)
-             ))
-        +td(div("divId2", h2("Content"))+iframe("<content>.html", "syntax", width, height))
+            div(class("panel"), id("index"),  
+                  h2("Nonterminals")+table("cellpadding=\"2px\"",refButtons(pt))))
+         +td(div(class("panel"), id("syntax"), h2("Content")+p(getContent(pt))
+        ))
         )))
         ); 
    return r; 
@@ -270,14 +252,15 @@ list[tuple[str, loc]] inputs = [
                     // <"C", |project://main/std/lang/c90/syntax/C.rsc|> 
                     <"dot", |project://main/std/lang/dot/syntax/Dot.rsc|>
                     , <"pico", |project://main/std/lang/pico/syntax/Main.rsc|>
-                    , <"rascal", |project://main/std/lang/rascal/syntax/Rascal.rsc|> 
-                    , <"sdf2", |project://main/std/lang/sdf2/syntax/Sdf2.rsc|>                            
+                    // , <"rascal", |project://main/std/lang/rascal/syntax/Rascal.rsc|> 
+                    //, <"sdf2", |project://main/std/lang/sdf2/syntax/Sdf2.rsc|>                            
                    ];
    
 public void main() {
    // rprint(parseModule(|project://main/src/Ap.rsc|));
    // loc l = |project://main/src/C.rsc|;
    // println(inputs);
+   topCcs();
    for (<title, l><-inputs)  {
        println(title);
        rascal2HTML(title, l, |file:///ufs/bertl/html|);
@@ -290,11 +273,19 @@ public void rascal2HTML(str title, loc input, loc output) {
          mkDirectory(output);
          }
      Tree pt = rascal2ParseTree(input);
-     str r =  ParseTree2HTML(pt, title);
-     loc outIframe = output+"<content>.html";
-     writeFile(outIframe, r);
      loc outMain = output+"index.html";
      str top = topPanel(pt, title);
      writeFile(outMain, top);   
 }
-   
+
+private void topCcs() {
+    S(".panel", "border:2px groove grey", "background-color:antiquewhite", "overflow:auto", 
+        "max-width:<width>", "max-height:<height>");
+    S("td", "vertical-align:top");
+    S("h1", "text-align:center");
+    S("h2", "text-align:center");
+    S("#syntax", "background-color:antiquewhite", "max-height:<height>");
+    S(".keyword", "font-weight:bold", "color:darkmagenta");
+    S(".string", "color:darkmagenta");
+    S(".comment","color:gray");
+    }   

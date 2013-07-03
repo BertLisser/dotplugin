@@ -55,14 +55,17 @@ str board() {
     }
     
 str letterCode() {
-    return dl(dt("A")+dd("1")+dt("B")+dd("2")+dt("C")+dd("3"));
+    str r = h3(small("LETTER FREQUENCY"));
+    str r1 = dl("<for(x<-[65..78]){><dt(small(stringChar(x)+"-"))> <dd(small("0"))> <}>");
+    str r2 = dl("<for(x<-[78..91]){><dt(small(stringChar(x)+"-"))> <dd(small("0"))> <}>");
+    return table(class("lettercode"), r+tr(td(r1), td(r2)));
     }
     
 str game() {
     return table(class("gameBoard"), 
     thead(tr(th("","width=20"), th(class("upHeader"), "S C R A B B L E")))+
     tfoot(tr(th(""), th("S C R A B B L E")))+
-    tbody(tr(th(class("sideHeader"),  "S C R A B B L E"), td(board())+td(letterCode(),"style=vertical-align:top"))));
+    tbody(tr(td(letterCode(), td(board())+th(class("sideHeader"), "S C R A B B L E"),"style=vertical-align:top"))));
     }
 
 public void main()  {
@@ -72,30 +75,30 @@ public void main()  {
     S(".w2", "background-color:pink");
     S(".l3", "background-color:blue");
     S(".l2", "background-color:lightskyblue");
-    S("table");
+    S("small","font-size: 9px");
     S(".bigheader", "background-color:lighgrey", 
                    "border:1px solid grey",
                    "height:20px",
                    "text-align:center"
                  );
     S("td", "padding:0");
-    S("dl", "border:3px double #ccc","padding:0.5em","margin:0");
-    S("dt", "float: left", /*"clear": "left",*/ 
-                "width:30px", "text-align:right", 
-                "font-weight:bold", "color:green"); 
-    S("dt:after", "content:\":\"");
+    S("dl",  "padding:0.5em","margin:0","width:20px");
+    S("dt", "float: left", "clear: left", 
+                "width:10px", "text-align:right"); 
+    S("dd",    "margin:0");
     S(".gameBoard","border:1px solid black",  "background-color:seashell", "width:500px");
     S(".upHeader", "transform:rotate(180deg)",
                  "-ms-transform:rotate(180deg)", /* IE 9 */
-                 "-webkit-transform: rotate(18 0deg)");
+                 "-webkit-transform: rotate(180deg)");
+    S(".rotate", "transform:rotate(-90deg)",
+                 "-ms-transform:rotate(-90deg)", /* IE 9 */
+                 "-webkit-transform: rotate(-90deg)");
     S(".sideHeader", "width:1m", "letter-spacing: 5px",
                      "font-size: 18px",
                    "height:300px");  
-    // S(".sideTableHeader", "border:1px solid", "padding:0", "text-align:right","max-width:1m");
-                 /* Safari and Chrome */
     str m = table(tr(td(game())));
     str r = html(m);
     // println(r);
-    writeFile(|file:///ufs/bertl/html/aap.html|, r);
-    htmlDisplay("dotplugin", "html", r);
+    // writeFile(|file:///ufs/bertl/html/aap.html|, r);
+    htmlDisplay("dotplugin", "scrabble/index", r);
     }
