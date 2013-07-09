@@ -249,9 +249,9 @@ private str topPanel(Tree pt, str titl) {
    }
    
 list[tuple[str, loc]] inputs = [
-                    // <"C", |project://main/std/lang/c90/syntax/C.rsc|> 
-                    <"dot", |project://main/std/lang/dot/syntax/Dot.rsc|>
-                    , <"pico", |project://main/std/lang/pico/syntax/Main.rsc|>
+                    <"C", |project://main/std/lang/c90/syntax/C.rsc|> 
+                    // <"dot", |project://main/std/lang/dot/syntax/Dot.rsc|>
+                    // , <"pico", |project://main/std/lang/pico/syntax/Main.rsc|>
                     // , <"rascal", |project://main/std/lang/rascal/syntax/Rascal.rsc|> 
                     //, <"sdf2", |project://main/std/lang/sdf2/syntax/Sdf2.rsc|>                            
                    ];

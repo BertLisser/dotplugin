@@ -59,7 +59,12 @@ public map[str, WProperty] key2att = (
    "dt":(tg:"dt"),
    "dd":(tg:"dd"),
    "sub":(tg:"sub"),
-   "sup":(tg:"sup")     
+   "sup":(tg:"sup"), 
+   "button":(tg:"button"), 
+   "form":(tg:"form"),
+   "fieldset":(tg:"fieldset"),
+   "label":(tg:"label"),
+   "input":(tg:"input")    
    );
    
 public str class(str s) {
@@ -71,6 +76,8 @@ public str id(str s) {
   }   
    
 public map[str , WProperty] tag2att = ();
+
+public map[str , str] name2body = ();
    
    
 public str toCSS() {
@@ -79,6 +86,16 @@ public str toCSS() {
        r+="<x>{<for(y<-tag2att[x]){><y>:<tag2att[x][y]>;\n<}>}\n";
        }
    r+="\</style\>\n";
+   return r;
+   }
+ 
+   
+public str toScript() {
+   str r = "\<script\>\n";
+   for (x<-name2body) {
+       r+="function <x>{<name2body[x]>}\n";
+       }
+   r+="\</script\>\n";
    return r;
    }
 
@@ -93,7 +110,7 @@ private str _html(str head, str body) {
 }
 
 public str html(str b) {
-    return  _html(head(toCSS()), body(b));
+    return  _html(head(toScript()+toCSS()), body(b));
     }
     
 public str html(str hd, str b) {
@@ -116,19 +133,21 @@ private str _(str key, map[str, WProperty] m, list[str] txt) {
          +"\><s>\</<key>\>";
     }
  
-public void _(list[str] atts) {
+public void S(str atts...) {
    str s = "<for(x<-atts, !contains(x,":")){><x><}>";
    WProperty v = (key:val| x<-atts, /<key:[\w\-\s]+>:<val:.+>/:=x);
    tag2att +=(s:v);
    }
    
-public void S(str att...) {return _(att);
-}  
+public void Js(str name, str body) {
+   name2body += (name:body);
+   } 
+   
 public str a(str txt ...) {return _("a", key2att, txt);}
 
 public str p(str txt... ) {return _("p", key2att, txt);}
 
-public str br() {return _("br", key2att, "");}
+public str br() {return _("br", key2att, []);}
 
 public str h1(str txt...) {return _("h1", key2att, txt);}
 
@@ -219,3 +238,18 @@ public str dd(str txt...){return _("dd", key2att, txt);}
 public str sub(str txt...){return _("sub", key2att, txt);}
 
 public str sup(str txt...){return _("sup", key2att, txt);}
+
+
+
+
+/* -------------------------------------------------------------------------- */
+
+public str button(str txt...){return _("button", key2att, txt);}
+
+public str form(str txt...){return _("form", key2att, txt);}
+
+public str input(str txt...){return _("input", key2att, txt);}
+
+public str fieldset(str txt...){return _("fieldset", key2att, txt);}
+
+public str label(str txt...){return _("label", key2att, txt);}

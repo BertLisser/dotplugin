@@ -61,11 +61,20 @@ str letterCode() {
     return table(class("lettercode"), r+tr(td(r1), td(r2)));
     }
     
+str f(str s, str s1) {
+    return tr(td(div(class("field"), strong(s)+sub(s1))));
+    }
+    
+str picture() {
+    return table(f("S","1")+f("C","3")+f("R","1")
+          +f("A","1")+f("B","3")+f("B","3")+f("L","1")+f("E","1"));
+    }
+    
 str game() {
     return table(class("gameBoard"), 
     thead(tr(th("","width=20"), th(class("upHeader"), "S C R A B B L E")))+
     tfoot(tr(th(""), th("S C R A B B L E")))+
-    tbody(tr(td(letterCode(), td(board())+th(class("sideHeader"), "S C R A B B L E"),"style=vertical-align:top"))));
+    tbody(tr(td(table(class("left"), tr(td(picture()))+tr(td(letterCode())))+td(board())+th(class("sideHeader"), "S C R A B B L E"),"style=vertical-align:top"))));
     }
 
 public void main()  {
@@ -76,7 +85,7 @@ public void main()  {
     S(".l3", "background-color:blue");
     S(".l2", "background-color:lightskyblue");
     S("small","font-size: 9px");
-    S(".bigheader", "background-color:lighgrey", 
+    S(".bigheader", "background-color:lightgrey", 
                    "border:1px solid grey",
                    "height:20px",
                    "text-align:center"
@@ -96,6 +105,7 @@ public void main()  {
     S(".sideHeader", "width:1m", "letter-spacing: 5px",
                      "font-size: 18px",
                    "height:300px");  
+    S(".field", "border:double", "background-color:white");
     str m = table(tr(td(game())));
     str r = html(m);
     // println(r);
