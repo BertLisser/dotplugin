@@ -20,6 +20,7 @@ public map[str, WProperty] key2att = (
    "body":(tg:"body"),
    "head":(tg:"head"),
    "title":(tg:"title"),
+   "meta":(tg:"meta"),
    "script":(tg:"script"),
    "h1":(tg:"h1"), 
    "h2":(tg:"h2"),  
@@ -33,7 +34,6 @@ public map[str, WProperty] key2att = (
    "tt":(tg:"tt"),
    "div":(tg:"div"),
    "span":(tg:"span"),
-   "svg":(tg:"svg"),
    "pre":(tg:"pre"), 
    "table":(tg:"table"),  
    "tr":(tg:"tr"),
@@ -64,7 +64,9 @@ public map[str, WProperty] key2att = (
    "form":(tg:"form"),
    "fieldset":(tg:"fieldset"),
    "label":(tg:"label"),
-   "input":(tg:"input")    
+   "input":(tg:"input"),
+   "svg":(tg:"svg"), 
+   "rect":(tg:"rect")    
    );
    
 public str class(str s) {
@@ -148,6 +150,8 @@ public str a(str txt ...) {return _("a", key2att, txt);}
 public str p(str txt... ) {return _("p", key2att, txt);}
 
 public str br() {return _("br", key2att, []);}
+
+public str meta() {return _("meta", key2att, []);}
 
 public str h1(str txt...) {return _("h1", key2att, txt);}
 
@@ -253,3 +257,9 @@ public str input(str txt...){return _("input", key2att, txt);}
 public str fieldset(str txt...){return _("fieldset", key2att, txt);}
 
 public str label(str txt...){return _("label", key2att, txt);}
+
+/* --------------------------------------------------------------------------- */
+
+public str svg(str txt...) {return _("svg", key2att, txt);}
+
+public str rect(str txt...) {return _("rect", key2att, txt);}
