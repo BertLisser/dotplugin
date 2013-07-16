@@ -127,9 +127,10 @@ private str _(str key, map[str, WProperty] m, list[str] txt) {
     WProperty props = m[key];
     str key = props[tg];
     /* Cannot handle with ||  -- Bug in Rascal? */
-    list[str] content = [x|str x<-txt, or(contains(x,"\<"),!contains(x,"="))];
+    // Bug? list[str] content = [replaceAll(x, "&eq","=")| str x<-txt, or(contains(x,"\<"),!contains(x,"="))];
+    list[str] content = [x| str x<-txt, or(contains(x,"\<"),!contains(x,"="))];
     list[str] atts = txt - content;
-    str s = "<for(x<-content){><x><}>";
+    str s = replaceAll("<for(x<-content){><x><}>", "&eq","=");
     return "\<<key><for(x<-props, x!=tg)
          {> <x>=\"<props[x]>\"<}> <for(x<-atts) {> <x><}>"
          +"\><s>\</<key>\>";
