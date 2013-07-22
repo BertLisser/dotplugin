@@ -66,7 +66,16 @@ public map[str, WProperty] key2att = (
    "label":(tg:"label"),
    "input":(tg:"input"),
    "svg":(tg:"svg"), 
-   "rect":(tg:"rect")    
+   "circle":(tg:"circle"), 
+   "ellipse":(tg:"ellipse"), 
+   "rect":(tg:"rect"), 
+   "line":(tg:"line"), 
+   "polyline":(tg:"polyline"), 
+   "polygon":(tg:"polygon"),
+   "g":(tg:"g"),
+   "use":(tg:"use"), 
+   "defs":(tg:"defs"),
+   "symbol":(tg:"symbol")      
    );
    
 public str class(str s) {
@@ -264,3 +273,23 @@ public str label(str txt...){return _("label", key2att, txt);}
 public str svg(str txt...) {return _("svg", key2att, txt);}
 
 public str rect(str txt...) {return _("rect", key2att, txt);}
+
+public str line(str txt...) {return _("line", key2att, txt);}
+
+public str circle(str txt...) {return _("circle", key2att, txt);}
+
+public str ellipse(str txt...) {return _("ellipse", key2att, txt);}
+
+public str polygon(str txt...) {return _("polygon", key2att, txt);}
+
+public str polyline(str txt...) {return _("polyline", key2att, txt);}
+
+public str g(str txt...) {return _("g", key2att, txt);}
+
+public str use(str txt...) {return _("use", key2att, txt);}
+
+public str defs(str txt...) {return _("defs", key2att, txt);}
+
+public str symbol(str txt...) {return _("symbol", key2att, txt);}
+
+
