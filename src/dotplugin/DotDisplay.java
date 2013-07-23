@@ -11,7 +11,9 @@ import java.net.MalformedURLException;
 import java.net.URI;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -91,10 +93,16 @@ public class DotDisplay {
 	private void htmlDisplay(String projName, String outName, String input,
 			IEvaluatorContext ctx) {
 		try {
-			dotOutput = getHtmlOutputLoc(projName, outName);
+			dotOutput = getHtmlOutputLoc(projName, outName);	
 			InputStream is = IOUtils.toInputStream(input);
 			if (dotOutput.exists())
 				dotOutput.delete(true, null);
+			if (dotOutput.getParent().getType()==IResource.FOLDER) {
+				IFolder f = (IFolder) dotOutput.getParent();
+				if (!f.exists()) {
+					f.create(true, false, null);
+				}
+			}
 			dotOutput.create(is, true, null);
 			PlatformUI.getWorkbench().getDisplay().asyncExec(runnable);
 		} catch (CoreException e) {

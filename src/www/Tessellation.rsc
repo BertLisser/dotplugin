@@ -5,39 +5,51 @@ import www::XmlColor;
 import dotplugin::Display;
 import util::Math;
 
-str w = "600px";
-real left = sin(PI()*1/3);
-real d =  2*left;
-num height = 50;
-num width = height*(d/2);
+int w = 500;
+num d =  sqrt(3);
+list[str] kleur = ["red", "green", "blue"];
 
-str poly(num x, num y, str kleur) {
-     return use(class(kleur), "xlink:href=\"#hex\"","x=\"<x>\"", 
-       "y=\"<y>\"","width=\"<width>\"","height=\"<height>\""
-       , "fill=\"<kleur>\""
-       );
-     }
+str poly(num x, num y, str color) {
+    str coord = 
+    "<for(int i<-[0..6])
+      {> <x+round(sin(PI()*i/3), 0.01)> <y+round(cos(PI()*i/3), 0.01)>,
+     <}>";
+    return polygon(
+           "fill=\"<color>\"",
+          "stroke=\"black\"", "stroke-width=\"0.3\"" 
+         , "points=\"<coord>\"");
+    
+    }
+ 
+str polyRow(num x, num y, int ofs, int n) {
+    return "<for(int i<-[0..n])
+    {> <poly(x+i*d, y, kleur[(ofs+2*i)%3])>
+    <}>";
+    }
+    
+str polyRows(int cols, int rows) {
+    return "<for(int i<-[0..rows])
+    {> <polyRow(0.5+i*d*0.5, 1.5*i, i%3, cols)>
+    <}>";
+    }
 
-str polyRow(num x, num y) {return "<for(i<-[0..10]){> <poly(x+i*width, y, (i%2==0?"red":"blue"))> <}>";}      
+str define() {
+        return symbol(id("hex"),
+       "preserveAspectRatio=\"xMinYMin meet\"",
+       "viewBox = \"<-1.2> <-1.2> <10*d> <4>\"",
+        polyRows(6, 6));
+    } 
+    
+str present() {
+    return use("xlink:href=\"#hex\"","x=\"0\"", "y=\"0\"",
+    "width=\"<w>\"","height=\"<w>\"");  
+    }
 
 public void main()  {
-    str coord = "<for(i<-[0..6]){> <round(sin(PI()*i/3), 0.01)> <round(cos(PI()*i/3), 0.01)>,<}>";
-    println(coord);
-    S(".main", "width:<w>", "height:<w>");
-    S(".polygon",  "fill:green");
-    S(".red","fill: none");
-    S(".blue","fill: none");
-    str m = "";    
-    m+=svg("width=<w>", "height=<w>",  symbol(id("hex"), 
-       //  "preserveAspectRatio=\"xMidyMid slice\"",
-       "preserveAspectRatio=\"none\"",
-       "viewBox = \"<-left> <-1.0> <d> <2>\"",
-       polygon(
-          // "fill=\"green\"",
-          "stroke=\"black\"", "stroke-width=\"0.3\"" 
-         , "points=\"<coord>\""))+polyRow(0, 0)+polyRow(width/2, height));
+    str m =svg("width=\"<w>\"", "height=\"<w>\"",  
+         define()+present());
     str r = html(m);
     // println(r);
     writeFile(|file:///ufs/bertl/aap.html|, r);
-    htmlDisplay("dotplugin", "tessellation", r);
+    htmlDisplay("dotplugin", "tessellation/index", r);
     }
