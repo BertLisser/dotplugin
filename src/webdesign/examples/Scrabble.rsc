@@ -1,8 +1,8 @@
-module www::Scrabble
+module webdesign::examples::Scrabble
 import Prelude;
-import www::HtmlWrite;
-import www::XmlColor;
-import dotplugin::Display;
+import webdesign::Xml;
+import webdesign::XmlColor;
+import display::Display;
 
 str siz = "25px";
 

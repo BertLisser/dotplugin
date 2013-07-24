@@ -1,13 +1,13 @@
-module www::Tessellation
+module webdesign::examples::Tessellation
 import Prelude;
-import www::HtmlWrite;
-import www::XmlColor;
-import dotplugin::Display;
+import webdesign::Xml;
+import webdesign::XmlColor;
+import display::Display;
 import util::Math;
 
 int w = 500;
 num d =  sqrt(3);
-list[str] kleur = ["red", "green", "blue"];
+list[str] kleur = ["lightgray", "lightcyan", "lightblue"];
 
 str poly(num x, num y, str color) {
     str coord = 
@@ -16,7 +16,7 @@ str poly(num x, num y, str color) {
      <}>";
     return polygon(
            "fill=\"<color>\"",
-          "stroke=\"black\"", "stroke-width=\"0.3\"" 
+          "stroke=\"black\"", "stroke-width=\"0.01\"" 
          , "points=\"<coord>\"");
     
     }

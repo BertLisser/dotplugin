@@ -1,8 +1,8 @@
-module www::ColorPalet
+module webdesign::examples::ColorPalet
 import Prelude;
-import www::HtmlWrite;
-import www::XmlColor;
-import dotplugin::Display;
+import webdesign::Xml;
+import webdesign::XmlColor;
+import display::Display;
 
 
 str colorList(int from, int n) {

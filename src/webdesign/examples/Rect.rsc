@@ -1,8 +1,8 @@
-module www::Rect
+module webdesign::examples::Rect
 import Prelude;
-import www::HtmlWrite;
-import www::XmlColor;
-import dotplugin::Display;
+import webdesign::Xml;
+import webdesign::XmlColor;
+import display::Display;
 
 
 

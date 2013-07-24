@@ -7,7 +7,7 @@
 }
 @contributor{Bert Lisser - Bert.Lisser@cwi.nl}
 /* Don't use the symbol '=' in the text */
-module www::HtmlWrite
+module webdesign::Xml
 import Prelude;
 
 public str tg = "tg"; // tag

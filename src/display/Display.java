@@ -1,4 +1,4 @@
-package dotplugin;
+package display;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -28,17 +28,19 @@ import org.eclipse.ui.part.FileEditorInput;
 import org.rascalmpl.interpreter.IEvaluatorContext;
 import org.apache.commons.io.IOUtils;
 
+import dotplugin.Activator;
+import dotplugin.GraphViz;
 import dotplugin.editors.SvgBrowser;
 
 @SuppressWarnings("unused")
-public class DotDisplay {
+public class Display {
 
 	private static final String DOT_EXTENSION = ".dot"; //$NON-NLS-1$
 	private static final String TMP_FILE_PREFIX = "graphviz"; //$NON-NLS-1$
 
 	private final IValueFactory values;
 
-	public DotDisplay(IValueFactory values) {
+	public Display(IValueFactory values) {
 		super();
 		this.values = values;
 	}
