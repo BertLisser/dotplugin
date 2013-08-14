@@ -15,13 +15,16 @@ public str name = "name";
 
 alias WProperty = map[str key, str val];
 
+str prefix = "\<![CDATA[";
+
+str suffix = "]]\>";
+
 public map[str, WProperty] key2att = (
    "a":(tg:"a"), 
    "body":(tg:"body"),
    "head":(tg:"head"),
    "title":(tg:"title"),
    "meta":(tg:"meta"),
-   "script":(tg:"script"),
    "h1":(tg:"h1"), 
    "h2":(tg:"h2"),  
    "h3":(tg:"h3"), 
@@ -72,10 +75,12 @@ public map[str, WProperty] key2att = (
    "line":(tg:"line"), 
    "polyline":(tg:"polyline"), 
    "polygon":(tg:"polygon"),
+   "text":(tg:"text"), 
+   "path":(tg:"path"),
    "g":(tg:"g"),
    "use":(tg:"use"), 
    "defs":(tg:"defs"),
-   "symbol":(tg:"symbol")      
+   "symbol":(tg:"symbol")   
    );
    
 public str class(str s) {
@@ -178,8 +183,6 @@ public str div(str txt...) {return _("div", key2att, txt);}
 public str body (str txt...) {return _("body", key2att, txt);}
 
 public str head (str txt...) {return _("head", key2att, txt);}
-
-public str script (str txt...) {return _("script", key2att, txt);}
 
 public str title (str txt...) {return _("title", key2att, txt);}
 
@@ -284,12 +287,18 @@ public str polygon(str txt...) {return _("polygon", key2att, txt);}
 
 public str polyline(str txt...) {return _("polyline", key2att, txt);}
 
+public str text(str txt...) {return _("text", key2att, txt);}
+
 public str g(str txt...) {return _("g", key2att, txt);}
+
+public str path(str txt...) {return _("path", key2att, txt);}
 
 public str use(str txt...) {return _("use", key2att, txt);}
 
 public str defs(str txt...) {return _("defs", key2att, txt);}
 
 public str symbol(str txt...) {return _("symbol", key2att, txt);}
+
+public str script(str txt) {return "\<script type=\"text/ecmascript\"\>"+prefix+txt+suffix+"\</script\>";}
 
 
