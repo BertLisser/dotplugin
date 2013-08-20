@@ -149,6 +149,25 @@ private str _(str key, map[str, WProperty] m, list[str] txt) {
          {> <x>=\"<props[x]>\"<}> <for(x<-atts) {> <x><}>"
          +"\><s>\</<key>\>";
     }
+    
+private str __(str key, map[str, WProperty] m, list[str] txt) {
+    str xmlns = "http://www.w3.org/2000/svg";
+    WProperty props = m[key];
+    str key = props[tg];   
+    list[str] content = [x| str x<-txt, or(contains(x,"\<"),!contains(x,"="))];
+    list[str] atts = txt - content;
+    str s = replaceAll("<for(x<-content){><x><}>", "&eq","=");
+    for (x<-atts) {
+        list[str] w = split("=", x);
+        props += (replaceAll(w[0], " ",""):w[1]);
+        }
+    return 
+       "function <(content[0]?)?content[0]:key>(doc) {
+        var el = doc.createElementNS(\"<xmlns>\", \"<key>\");
+       <for(x<-props, x!=tg) {>
+          el.setAttribute(\"<x>\", <props[x]>);
+       <}>; return el;}";     
+    }
  
 public void S(str atts...) {
    str s = "<for(x<-atts, !contains(x,":")){><x><}>";
@@ -277,21 +296,39 @@ public str svg(str txt...) {return _("svg", key2att, txt);}
 
 public str rect(str txt...) {return _("rect", key2att, txt);}
 
+public str Rect(str txt...) {return __("rect", key2att, txt);}
+
 public str line(str txt...) {return _("line", key2att, txt);}
+
+public str Line(str txt...) {return __("line", key2att, txt);}
 
 public str circle(str txt...) {return _("circle", key2att, txt);}
 
+public str Circle(str txt...) {return __("circle", key2att, txt);}
+
 public str ellipse(str txt...) {return _("ellipse", key2att, txt);}
+
+public str Ellipse(str txt...) {return __("ellipse", key2att, txt);}
 
 public str polygon(str txt...) {return _("polygon", key2att, txt);}
 
+public str Polygon(str txt...) {return __("polygon", key2att, txt);}
+
 public str polyline(str txt...) {return _("polyline", key2att, txt);}
+
+public str Polyline(str txt...) {return __("polyline", key2att, txt);}
 
 public str text(str txt...) {return _("text", key2att, txt);}
 
+public str Text(str txt...) {return __("text", key2att, txt);}
+
 public str g(str txt...) {return _("g", key2att, txt);}
 
+public str G(str txt...) {return __("g", key2att, txt);}
+
 public str path(str txt...) {return _("path", key2att, txt);}
+
+public str Path(str txt...) {return __("path", key2att, txt);}
 
 public str use(str txt...) {return _("use", key2att, txt);}
 
