@@ -68,7 +68,7 @@ public map[str, WProperty] key2att = (
    "fieldset":(tg:"fieldset"),
    "label":(tg:"label"),
    "input":(tg:"input"),
-   "svg":(tg:"svg"), 
+   "svg":(tg:"svg", "xmlns":"http://www.w3.org/2000/svg"), 
    "circle":(tg:"circle"), 
    "ellipse":(tg:"ellipse"), 
    "rect":(tg:"rect"), 
@@ -338,4 +338,26 @@ public str symbol(str txt...) {return _("symbol", key2att, txt);}
 
 public str script(str txt) {return "\<script type=\"text/ecmascript\"\>"+prefix+txt+suffix+"\</script\>";}
 
+public str srcScript(str lc) {return "\<script type=\"text/ecmascript\" xlink:href=\"<lc>\"\>"+"\</script\>";}
 
+public str radioButton(str name, str script, list[str] choices) {
+                   return form(fieldset(ul("<for (c <- choices)
+                   {> <li(input("type=\"radio\"", id(c), "name=\"<name>\"", "onchange=\"<script>\"")
+                   +label("for=\"<c>\"", "<c>"))> <}>")));
+                   }
+
+public void initSVG(str id, loc f) {                   
+   writeFile(f, "function initSVG(evt){
+              ' svgDocument = evt.target.ownerDocument;
+              ' root = svgDocument.getElementById(\"<id>\");
+              ' parent.drawCircle= drawCircle;
+              ' var obj = root;
+              ' curX = curY = 0;
+              ' if (obj.offsetParent) {
+              '  do {
+              '     curX += obj.offsetLeft;
+              '     curY += obj.offsetTop;
+              '     } while (obj = obj.offsetParent);
+              '    }              
+              '  }");
+            }
