@@ -1,4 +1,4 @@
-module webdesign::Xml2
+module webdesign::D3
 import Prelude;
 import display::Display;
 
@@ -39,7 +39,15 @@ public str html(str head, str body) {
 
 /* -------------------------------------------------------------------------- */
 
-data ScriptElm = var(map[str, str] m1)|function(JavaScript p)| call(str obj, Bundle bundle);
+data ScriptElm = var(map[str, value] m1)
+             |function(JavaScript p)
+             |function(str d, JavaScript p1)
+             |function(str d, str i, JavaScript p1)
+             |function(str p2)
+             |function(str d, str p2)
+             |function(str d, str i, str p2)
+             |expr(str d)
+             |call(str obj, Bundle bundle);
 
 data JavaScript = program(list[ScriptElm scriptElm]);
 
@@ -56,11 +64,42 @@ data Bundle = attr(map[str, value])|
               remove(str obj)| remove(str obj, Bundle bundle) |
               on(str event, ScriptElm s)| on(str event, ScriptElm s, Bundle bundle) |
               selectAll(str obj, Bundle bundle) |
-              select(str obj, Bundle bundle)
+              select(str obj, Bundle bundle) |
+              csv(str l, ScriptElm callback) |
+              csv(str l, ScriptElm accessor, ScriptElm callback) |
+              tsv(str l, ScriptElm callback) |
+              tsv(str l, ScriptElm accessor, ScriptElm callback) |
+              text(str file, ScriptElm callback) |
+              csv_parse(str d) |
+              csv_parse(str d, ScriptElm accessor)           
               ;
+             
+value display(value v) {
+    if (ScriptElm e := v) {
+          return toString(e);
+          }
+    if (str e := v) {
+          return "\"<e>\"";
+          }
+    if (list[value] e:= v) {
+          if (isEmpty(e)) return "[]";
+          str r = "[<display(head(e))>";
+          for (t<-tail(e)) r+=", <display(t)>";
+          return r+"]";
+          }
+    if (map[str, value] e := v) {
+          if (isEmpty(e)) return "{}";
+          str key = getOneFrom(e);
+          r = "{<key>:<display(e[key])>";
+          e = delete(e, key);
+          for (t<-e) r+=",<t>:<display(e[t])>";
+          return r+"}";
+          }
+    return v;
+    }
               
 str display(str key, map[str, value] m) {
-      return "<for(k<-m) {>.<key>(\"<k>\",<m[k]>)<}>";    
+      return "<for(k<-m) {>.<key>(\"<k>\",<display(m[k])>)<}>";    
       }
               
 str toString(Bundle b) {
@@ -87,9 +126,16 @@ str toString(Bundle b) {
                  case on(str event, str d): r+=".on(\"<event>\", <d>)";
                  case on(str event, str d, _): r+=".on(\"<event>\", <d>)";
                  case on(str event, ScriptElm e): {r+=".on(\"<event>\", <toString(e)>)"; return r;}
-                 case on(str event, ScriptElm e, _): r+=".on(\"<event>\", <toString(e)>)";
+                 case on(str event, ScriptElm e,  Bundle c): {r+=".on(\"<event>\", <toString(e)>)";return r+ toString(c);}
                  case selectAll(str obj, _): r+=".selectAll(\"<obj>\")";
                  case select(str obj, _): r+=".select(\"<obj>\")";
+                 case text(str l, ScriptElm callback) : return r+ ".text(\"<l>\", <toString(callback)>)";           
+                 case csv(str l, ScriptElm callback) : return r+ ".csv(\"<l>\", <toString(callback)>)";
+                 case csv(str l, ScriptElm acc, ScriptElm callback) : r+= ".csv(\"<l>\" , <toString(acc)>, <toString(callback)>)"; 
+                 case tsv(str l, ScriptElm callback) : return r+ ".tsv(\"<l>\", <toString(callback)>)";
+                 case tsv(str l, ScriptElm acc, ScriptElm callback) : r+= ".tsv(\"<l>\" , <toString(acc)>, <toString(callback)>)";                   
+                 case csv_parse(str d, ScriptElm acc) : return r+".csv.parse(<d>, <toString(acc)>)";
+                 case csv_parse(str d) : return r+".csv.parse(<d>)";         
                  }
               return r;
               }
@@ -97,12 +143,21 @@ str toString(Bundle b) {
 str toString(ScriptElm s) {
      str r = "";
      switch(s) {
-          case var(map[str, str] m): return
-          "  var <for(k<-m) {><k>= <m[k]>,<}>"[..-1]+"\n";
-          case function(str s) : return "(function() {
-          ' <s> })\n";
-          case function(JavaScript p) : return "(function() {
-          ' <toString(p)> })\n"; 
+          case var(map[str, value] m): return
+          "  var <for(k<-m) {><k>= <display(m[k])>,<}>"[..-1]+"\n";
+          case function(str s) : return "function() {
+          ' <s> }\n";
+          case function(str d, str s) : return "function(<d>) {
+          ' <s> }\n";
+          case function(str d, str i, str s) : return "function(<d>, <i>) {
+          ' <s> }\n";
+          case function(JavaScript p) : return "function() {
+          ' <toString(p)> }\n"; 
+          case function(str d, JavaScript p) : return "function(<d>) {
+          ' <toString(p)> }\n"; 
+           case function(str d, str i, JavaScript p) : return "function(<d>, <i>) {
+          ' <toString(p)> }\n"; 
+          case expr(str d) : return "<d>";
           case call(str obj, Bundle b): return "<obj><toString(b)>";
           }
      return "Q";    
@@ -123,52 +178,6 @@ public str selectAll(str obj, Bundle bundle) {
 
      
  
-public void main() {
- int r = 12;
- str header = Z(title_, (), "d3.js Three Little Circles")+
- Z(button_, "Run") +
- Z(script_,(src_: "http://d3js.org/d3.v3.min.js", charset_:"utf-8"));
-  str body = Z(h1_, (id_: "three_little_circles"), "Three Little Circles") +
-  Z(script_, (type_:"text/javascript"), 
-       toString(program([var( ("dataset":"[{x:180, y:45},
-           {x:60, y:90}]")),
-           var(
-           ("dataEnter":"data.concat(293)",
-            "dataExit":"data.slice(0,2)",
-            "w":"360",
-            "h":"580"       
-           )), 
-           call(d3_, selectAll("h1", style(("color": "\"red\"")))),
-           var((svg_: 
-            toString(call(d3_, select(body_, add(svg_, attr((width_:"w", height_:"h"), style(("fill":"\"yellow\""))
-              ))))))),
-           call(svg_, dat("dataset", add(circle_,attr(( cx_:"180", cy_:"45", r_:"<r>")))))]
-          )))
-  +Z(p_, 
-  "Once upon a time, there were three little circles. 
-  '    This tutorial shows you how to manipulate them using selections.")
-  
-  /*
-  +Z(svg_, (width_:"360", height_:"180"), 
-       Z(circle_, (class_:"little", cx_:"180", cy_:"45", r_:"<r>"))+
-       Z(circle_,(class_:"little", cx_:"60", cy_:"90", r_:"<r>"))+
-       Z(circle_,(class_:"little", cx_:"300", cy_:"135", r_:"<r>"))
-       )
-   */
- 
-  +Z(script_, toString(program([call(d3_, selectAll(button_, on("click", function(
-        program([call(svg_, selectAll(circle_, 
-           transition(duration( 5000, style(("fill": "\"red\""))))))]))
-        
-      )))]))) 
-      ;
-      
-  println(header);
-   println(body);
-  htmlDisplay("dotplugin", "c3/index", html(
-         header
-    , body));
-}
 
 
 
@@ -269,4 +278,83 @@ public str   symbol_= "symbol";
 public str   script_ = "script";
 public str   charset_ = "charset";
 public str   d3_ = "d3";
+ 
+public void main() {
+ int r = 12;
+ str header = Z(title_, (), "d3.js Three Little Circles")+
+ Z(button_, "Run") +
+ Z(script_,(src_: "http://d3js.org/d3.v3.min.js", charset_:"utf-8"));
+  str body = Z(h1_, (id_: "three_little_circles"), "Three Little Circles") +
+  Z(script_, (type_:"text/javascript"), 
+       "function debug(obj) {
+       'var output = \'\';
+       ' for (property in obj) {
+       '   output += property + \': \' + obj[property]+\'; \';
+       '   }
+       '  alert(output);
+       ' }\n"+
+       toString(program([
+           var(
+           (
+            "w":360,
+            "h":580       
+           )) 
+           ,
+           call(d3_, selectAll(h1_, style(("color": "red")))),
+           var((svg_: 
+            call(d3_, select(body_, add(svg_, attr((width_: expr("w"), height_:expr("h")), style(("fill":"yellow"))
+              ))))))
+           ,
+           call(d3_, csv("aap.txt", 
+                function("error", "dataset", program([
+                expr("debug(dataset[0])"),
+                
+                call(svg_, 
+                 selectAll(".main", dat("dataset", 
+                  enter(add(circle_,
+                   attr((class_:"main", 
+                         cx_:function("d", "return d.x;"), 
+                         cy_:function("d", "return d.y;"), 
+                         r_:r))  
+               )))))
+           ,    
+           var(("border": call(svg_, selectAll(".border", dat("dataset")))))
+           ,   
+           call(d3_, selectAll(button_, on("click", 
+             function(program([
+                call(svg_, 
+                  selectAll(".main", 
+                     transition(duration( 5000, 
+                        style(("fill": "red"))
+                  ))))
+                  ,         
+                  call("border", enter(
+                      add(circle_,
+                         attr((class_:"border", 
+                               cx_:function("d", "return d.x;"), 
+                               cy_:function("d","return d.y;"), 
+                               r_:r+20), 
+                            style(("fill":"none",
+                                   "stroke":"black"),
+                               transition(duration(1000, 
+                                   attr(("r":12))
+                               ))
+                            ))
+                      )))
+                  ]
+             ))     
+           )))             
+          ]))))]
+          )))
+  +Z(p_, 
+  "Once upon a time, there were three little circles. 
+  '    This tutorial shows you how to manipulate them using selections.")  
+      ;
+      
+  println(header);
+   println(body);
+  htmlDisplay("dotplugin", "d3/index", html(
+         header
+    , body));
+}
  
