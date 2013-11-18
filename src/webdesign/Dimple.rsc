@@ -4,7 +4,7 @@ import webdesign::D3;
 import display::Display;
 
 
-tuple[str(str, int, int) newSvg, str(str, str) chart, tuple [str() bar] plot]  dimple = 
+public tuple[str(str, int, int) newSvg, str(str, str) chart, tuple [str() bar] plot]  dimple = 
   < 
      str(str tg, int w, int h) {
         return "dimple.newSvg(\"<tg>\",<w>, <h>);"; 
@@ -17,12 +17,25 @@ tuple[str(str, int, int) newSvg, str(str, str) chart, tuple [str() bar] plot]  d
   
 
   
-tuple[str(str, str, str) addCategoryAxis , str(str,str, str) addMeasureAxis, str(str, str, str) addSeries, str(str) draw] chart=
+public tuple[str(str, str, str) addCategoryAxis , 
+      str(str,str, str) addMeasureAxis, 
+      str(str, str, str) addSeries, 
+      str(str) draw,  
+      str(str, int, int, int, int) setBounds]
+chart=
 <
 str(str chart, str position, str field) {return "<chart>.addCategoryAxis(\"<position>\",\"<field>\")";},
 str(str chart, str position, str measure) {return "<chart>.addMeasureAxis(\"<position>\",\"<measure>\")";},
 str(str chart, str field, str plotFunction){return "<chart>.addSeries(<field>, <plotFunction>)";},
-str(str chart) {return "<chart>.draw()";}
+str(str chart) {return "<chart>.draw()";},
+str(str chart, int x, int y , int width, int height) {return 
+     "<chart>.setBounds(<x>, <y>, <width>, <height>)";}
+>;
+
+public tuple[str(str, str, str) addOrderRule] 
+axis = 
+<
+str(str axis, str ordering, str desc) {return "<axis>.addOrderRule(\"<ordering>\",<desc>)";}
 >;
 
 
@@ -35,8 +48,7 @@ public void main() {
  Z(script_,(src_: "http:dimplejs.org/dist/dimple.v1.1.2.min.js"))
  ;
  str body =  Z(h1_, (id_: "header"), "Dimple") +
-  Z(script_,  
-    toString(program([
+  JavaScript(
         var((svg_: expr(dimple.newSvg("body", 800, 600))))
         ,
         var(("data":expr("[
@@ -54,7 +66,7 @@ public void main() {
         expr(chart.addSeries("chart", "null", dimple.plot.bar()))
         ,
         expr(chart.draw("chart"))
-        ])));
+        );
       println(header);
       println(body);
       htmlDisplay("dotplugin", "dimple/index", html(

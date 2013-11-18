@@ -278,6 +278,19 @@ public str   symbol_= "symbol";
 public str   script_ = "script";
 public str   charset_ = "charset";
 public str   d3_ = "d3";
+
+
+public str JavaScript(ScriptElm e ...) {
+     return "<Z(script_, toString(program(e)))>";
+}
+
+public str JavaScriptCsv(str file, str error, str dat, ScriptElm e ...) {
+     return JavaScript(call(d3_, csv("<file>", function(error, dat, program(e)))));
+     }
+     
+public str JavaScriptTsv(str file, str error, str dat, ScriptElm e ...) {
+     return JavaScript(call(d3_, tsv("<file>", function(error, dat, program(e)))));
+     }
  
 public void main() {
  int r = 12;
@@ -292,8 +305,8 @@ public void main() {
        '   output += property + \': \' + obj[property]+\'; \';
        '   }
        '  alert(output);
-       ' }\n"+
-       toString(program([
+       ' }\n") + 
+   JavaScript([
            var(
            (
             "w":360,
@@ -304,10 +317,9 @@ public void main() {
            var((svg_: 
             call(d3_, select(body_, add(svg_, attr((width_: expr("w"), height_:expr("h")), style(("fill":"yellow"))
               ))))))
-           ,
-           call(d3_, csv("aap.txt", 
-                function("error", "dataset", program([
-                expr("debug(dataset[0])"),
+           ])
+  +JavaScriptCsv("aap.txt", "error", "dataset",
+             expr("debug(dataset[0])"),
                 
                 call(svg_, 
                  selectAll(".main", dat("dataset", 
@@ -317,12 +329,12 @@ public void main() {
                          cy_:function("d", "return d.y;"), 
                          r_:r))  
                )))))
-           ,    
-           var(("border": call(svg_, selectAll(".border", dat("dataset")))))
-           ,   
-           call(d3_, selectAll(button_, on("click", 
-             function(program([
-                call(svg_, 
+               ,    
+               var(("border": call(svg_, selectAll(".border", dat("dataset")))))
+               ,   
+               call(d3_, selectAll(button_, on("click", 
+               function(program([
+                  call(svg_, 
                   selectAll(".main", 
                      transition(duration( 5000, 
                         style(("fill": "red"))
@@ -332,7 +344,7 @@ public void main() {
                       add(circle_,
                          attr((class_:"border", 
                                cx_:function("d", "return d.x;"), 
-                               cy_:function("d","return d.y;"), 
+                               cy_:function("d", "return d.y;"), 
                                r_:r+20), 
                             style(("fill":"none",
                                    "stroke":"black"),
@@ -343,9 +355,8 @@ public void main() {
                       )))
                   ]
              ))     
-           )))             
-          ]))))]
-          )))
+           )))                         
+          )
   +Z(p_, 
   "Once upon a time, there were three little circles. 
   '    This tutorial shows you how to manipulate them using selections.")  
