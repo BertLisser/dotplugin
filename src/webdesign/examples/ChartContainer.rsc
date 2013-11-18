@@ -22,7 +22,9 @@ public void main() {
         ,
         expr(chart.addMeasureAxis("myChart", "y","Unit Sales"))
         ,
-        expr(chart.addSeries("myChart", "null", dimple.plot.bar()))
+        expr(chart.addSeries("myChart", "Channel",  dimple.plot.bar()))
+        ,
+        expr(chart.addLegend("myChart", 60, 10, 510, 20, "right"))
         ,
         expr(chart.draw("myChart"))
         );
