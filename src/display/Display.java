@@ -112,6 +112,27 @@ public class Display {
 			e.printStackTrace();
 		}
 	}
+	
+	private void htmlDisplay(ISourceLocation loc , String input,
+			IEvaluatorContext ctx) throws IOException {
+		try {
+			dotOutput = getHtmlOutputLoc(loc);	
+			InputStream is = IOUtils.toInputStream(input);
+			if (dotOutput.exists())
+				dotOutput.delete(true, null);
+			if (dotOutput.getParent().getType()==IResource.FOLDER) {
+				IFolder f = (IFolder) dotOutput.getParent();
+				if (!f.exists()) {
+					f.create(true, false, null);
+				}
+			}
+			dotOutput.create(is, true, null);
+			PlatformUI.getWorkbench().getDisplay().asyncExec(runnable);
+		} catch (CoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 	private IFile getSvgOutputLoc(String projName, String outName, URI uri)
 			throws IOException {
@@ -144,6 +165,20 @@ public class Display {
 				.getProject(projName);
 		IPath path = new Path(outName).addFileExtension("html");
 		dotOutput = p.getFile(new Path("src").append(path));
+		return dotOutput;
+	}
+	
+	private IFile getHtmlOutputLoc(ISourceLocation loc) throws IOException {
+		IFile dotOutput = null;
+		if (loc.getURI().getScheme().equals("project")) {
+			IPath path = new Path(loc.getURI().getPath());
+			String projName = loc.getURI().getAuthority();
+			IProject p = ResourcesPlugin.getWorkspace().getRoot()
+					.getProject(projName);
+			dotOutput = p.getFile(path);			 
+		}
+		if (dotOutput == null)
+			throw new IOException("Invalid uri:"+loc.getURI());
 		return dotOutput;
 	}
 
@@ -196,6 +231,12 @@ public class Display {
 			IEvaluatorContext ctx) {
 		String s = input.getValue();
 		htmlDisplay(projName.getValue(), out.getValue(), s, ctx);
+	}
+	
+	public void htmlDisplay(ISourceLocation loc, IString input,
+			IEvaluatorContext ctx) throws IOException {
+		String s = input.getValue();
+		htmlDisplay(loc , s, ctx);
 	}
 
 }

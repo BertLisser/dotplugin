@@ -71,7 +71,8 @@ data Bundle = attr(map[str, value])|
               tsv(str l, ScriptElm accessor, ScriptElm callback) |
               text(str file, ScriptElm callback) |
               csv_parse(str d) |
-              csv_parse(str d, ScriptElm accessor)           
+              csv_parse(str d, ScriptElm accessor) |
+              json(str l, ScriptElm callback)           
               ;
              
 value display(value v) {
@@ -135,7 +136,8 @@ str toString(Bundle b) {
                  case tsv(str l, ScriptElm callback) : return r+ ".tsv(\"<l>\", <toString(callback)>)";
                  case tsv(str l, ScriptElm acc, ScriptElm callback) : r+= ".tsv(\"<l>\" , <toString(acc)>, <toString(callback)>)";                   
                  case csv_parse(str d, ScriptElm acc) : return r+".csv.parse(<d>, <toString(acc)>)";
-                 case csv_parse(str d) : return r+".csv.parse(<d>)";         
+                 case csv_parse(str d) : return r+".csv.parse(<d>)";  
+                 case json(str l, ScriptElm callback) : return r+ ".json(\"<l>\", <toString(callback)>)";       
                  }
               return r;
               }
@@ -174,13 +176,7 @@ public str selectAll(str obj, Bundle bundle) {
             return "d3.selectAll(\"<obj>\")"+toString(bundle)+";\n";
             }
 */
-            
-
-     
- 
-
-
-
+          
 
 public str id_= "id";
 public str class_= "class";
@@ -291,7 +287,11 @@ public str JavaScriptCsv(str file, str error, str dat, ScriptElm e ...) {
 public str JavaScriptTsv(str file, str error, str dat, ScriptElm e ...) {
      return JavaScript(call(d3_, tsv("<file>", function(error, dat, program(e)))));
      }
- 
+
+public str JavaScriptJson(str file, str error, str dat, ScriptElm e ...) {
+     return JavaScript(call(d3_, json("<file>", function(error, dat, program(e)))));
+     }
+      
 public void main() {
  int r = 12;
  str header = Z(title_, (), "d3.js Three Little Circles")+

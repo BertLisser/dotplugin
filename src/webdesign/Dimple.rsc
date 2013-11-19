@@ -59,7 +59,7 @@ str val(value field) {
            r += "]";
            return r;
        }
-       if (str f := field) {return "\"<f>\"";}
+       if (str f := field) {return isEmpty(f)?"null":"\"<f>\"";}
        return "<field>";
  }
  

@@ -1,5 +1,6 @@
 module display::Display
 import lang::dot::Dot;
+import lang::json::IO;
 
 
 
@@ -37,3 +38,12 @@ public str dotToSvg(DotGraph g) {
 @javaClass{display.Display}
 @reflect{Uses URI Resolver Registry}
 public java void htmlDisplay(str projName, str outName, str sr); 
+
+@javaClass{display.Display}
+@reflect{Uses URI Resolver Registry}
+public java void htmlDisplay(loc location, str sr); 
+
+public void htmlDisplay(loc location, str sr, list[map[str, value]] json) {
+     writeTextJSonFile(location+"data.json", json);
+     htmlDisplay(location+"index.html", sr);
+     } 
