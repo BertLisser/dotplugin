@@ -1,4 +1,4 @@
-module webdesign::DataChart
+module webdesign::BarChart
 
 import Relation;
 import Set;
@@ -11,8 +11,11 @@ public tuple[int width, int height] svgDim = <590, 700>;
 public tuple[int x, int y, int width, int height] chartBounds =
      <60, 30, 510, 400>;
 
-
-public void drawChart(loc location,  str title, str x, str y, list[map[str, value]] dat) {
+public tuple[int x, int y, int width, int height, str align] legendBounds =
+     <60, 10, 510, 20, "right">;
+     
+public void drawBarChart(loc location,  str title, str x, str y, list[map[str, value]] dat,
+ value series) {
  str header  = Z(title_, (), title)+
  Z(script_,(src_: "http://d3js.org/d3.v3.min.js"))+
  Z(script_,(src_: "http:dimplejs.org/dist/dimple.v1.1.2.min.js"));
@@ -30,7 +33,11 @@ public void drawChart(loc location,  str title, str x, str y, list[map[str, valu
         ,
         expr(chart.addMeasureAxis("myChart", "y", y))
         ,
-        expr(chart.addSeries("myChart", "",  dimple.plot.bar()))
+        expr(chart.addSeries("myChart", series,  "dimple.plot.bar"))
+        ,
+        expr(chart.addLegend("myChart", legendBounds.x, legendBounds.y, 
+                                         legendBounds.width, legendBounds.height, 
+                                         legendBounds.align))
         ,
         expr(chart.draw("myChart"))
         );
